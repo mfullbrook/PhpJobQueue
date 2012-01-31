@@ -1,0 +1,10 @@
+
+redis:
+    paramaters:
+        - tcp://127.0.0.1:6379
+
+        
+    
+queues:
+    - { name: default, priority: 0 }
+    - { name: high, priority: 10 }

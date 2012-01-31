@@ -1,0 +1,7 @@
+> Unit Test Configuration Class
+> unit test QueuesConfig
+> unit test RedisConfig
+
+> describe QueueInterface
+> write RedisQueue
+>
