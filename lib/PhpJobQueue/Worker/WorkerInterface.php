@@ -9,10 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace PhpJobQueue\Config;
+namespace PhpJobQueue\Worker;
 
-                          
-interface ConfigurationInterface
+interface WorkerInterface
 {
     
 }

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of the PhpJobQueue package.
  *
@@ -49,7 +50,7 @@ class Configuration implements ConfigurationInterface
         // let handlers process input
         foreach ($this->options as $key => $value) {
             if (isset($this->configHandlers[$key])) {
-                $this->configHandlers[$key]->processInput($value);
+                $this->configHandlers[$key]->initialise($value);
             }
         }
     }

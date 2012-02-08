@@ -5,8 +5,6 @@ include __DIR__.'/../autoload.php';
 
 $queue = new PhpJobQueue\PhpJobQueue(__DIR__.'/config.yml');
 
-$client = $queue->getConfig('redis')->getClient();
-$client->set('library', 'predis');
-$retval = $client->get('library');
+$job = new PhpJobQueue\Job\CommandJob('date');
 
-var_dump($retval);
+$queue->enqueue($job);

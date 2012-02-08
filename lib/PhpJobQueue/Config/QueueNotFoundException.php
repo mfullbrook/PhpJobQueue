@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of the PhpJobQueue package.
  *
@@ -9,10 +8,6 @@
  * file that was distributed with this source code.
  */
 
-namespace PhpJobQueue\Config;
-
-                          
-interface ConfigurationInterface
+class QueueNotFoundException extends \Exception
 {
-    
 }

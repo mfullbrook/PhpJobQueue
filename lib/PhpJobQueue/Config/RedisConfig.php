@@ -11,13 +11,13 @@
 
 namespace PhpJobQueue\Config;
 
-use Predis;
-
 /**
  * Redis config
  */
 class RedisConfig
 {
+    const DEFAULT_PREFIX = 'PJQ:';
+    
     protected $parameters;
     
     protected $options;
@@ -39,7 +39,7 @@ class RedisConfig
         $this->options = array();
     }
     
-    public function processInput($input)
+    public function initialise($input)
     {
         if (!is_array($input)) {
             throw new \InvalidArgumentException('The `redis` configuration section is invalid.');
@@ -51,13 +51,27 @@ class RedisConfig
         if (isset($input['options'])) {
             $this->options = $input['options'];
         }
+        
+        // do we have a prefix?
+        if (empty($this->options['prefix'])) {
+            $this->options['prefix'] = self::DEFAULT_PREFIX;
+        }
+        
     }
     
-    public function getClient()
+    /**
+     * Parameters getter
+     */
+    public function getParameters()
     {
-        if (!isset($this->client)) {
-            $this->client = new Predis\Client($this->parameters, $this->options);
-        }
-        return $this->client;
+        return $this->parameters;
+    }
+    
+    /**
+     * Options getter
+     */
+    public function getOptions()
+    {
+        return $this->options;
     }
 }

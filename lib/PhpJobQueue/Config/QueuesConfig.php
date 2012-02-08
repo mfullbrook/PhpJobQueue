@@ -12,7 +12,9 @@
 namespace PhpJobQueue\Config;
 
 /**
- * Define the queues, priorities and any other related configuration.
+ * Define the queues, priorities and any other queue related configuration.
+ * Implements Iterator in order of priority (from highest to lowest)
+ * Implements ArrayAccess to access a queue configuration by name
  */
 class QueuesConfig implements \Iterator
 {
@@ -22,12 +24,14 @@ class QueuesConfig implements \Iterator
     
     protected $iteratorPosition;
     
+    protected $configuration;
+    
     /**
      * Set the defaults
      */
     public function __construct()
     {
-        $this->queues = array(PhpJobQueue\PhpJobQueue::DEFAULT_QUEUE);
+        $this->queues = array('queue');
         $this->priorities = array(0);
         $this->iteratorPosition = 0;
     }
@@ -35,7 +39,7 @@ class QueuesConfig implements \Iterator
     /**
      * Take the configuration of queues and ensure they are in numerical order
      */
-    public function processInput($input)
+    public function initialise($input)
     {
         if (!is_array($input)) {
             throw new \InvalidArgumentException('The `redis` configuration section is invalid.');
@@ -53,6 +57,16 @@ class QueuesConfig implements \Iterator
         }
     }
     
+    /**
+     * Returns the position bad on the queue name
+     */
+    protected function getPosition($name)
+    {
+        if (false === ($position = array_search($name, $this->queues))) {
+            throw new QueueNotFoundException();
+        }
+        return $position;
+    }
     
     /**
      * Iterator method: public mixed current ( void )
@@ -94,4 +108,34 @@ class QueuesConfig implements \Iterator
         return isset($this->queues[$this->iteratorPosition]);
     }
     
+    /**
+     * ArrayAccess method: abstract public boolean offsetExists ( mixed $offset )
+     */
+    public function offsetExists($offset)
+    {
+        return isset($this->queues[$this->getPosition($offset)]);
+    }
+    /**
+     * abstract public mixed offsetGet ( mixed $offset )
+     */
+    public function offsetGet($offset)
+    {
+        return $this->queues[$this->getPosition($offset)];        
+    }
+    
+    /**
+     * abstract public void offsetSet ( mixed $offset , mixed $value )
+     */
+    public function offsetSet($offset, $value)
+    {
+        // do nothing
+    }
+    
+    /**
+     * abstract public void offsetUnset ( mixed $offset )
+     */
+    public function offsetUnset($offset)
+    {
+        // do nothing
+    }
 }
