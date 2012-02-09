@@ -29,6 +29,7 @@ class Configuration implements ConfigurationInterface
     public function loadHandlers()
     {
         $this->configHandlers = array(
+            'general' => new GeneralConfig(),
             'redis' => new RedisConfig(),
             'queues' => new QueuesConfig(),
         );

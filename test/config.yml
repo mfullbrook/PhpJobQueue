@@ -2,9 +2,16 @@
 redis:
     paramaters:
         - tcp://127.0.0.1:6379
-
-        
     
 queues:
     - { name: default, priority: 0 }
     - { name: high, priority: 10 }
+
+general:
+    job_ttls:
+        success: 3600
+        failure: 
+    log:
+        enabled: true
+        level: debug
+        path: test/test.log
