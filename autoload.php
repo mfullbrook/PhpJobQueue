@@ -15,7 +15,7 @@ require __DIR__.'/vendor/symfony/Symfony/Component/ClassLoader/DebugUniversalCla
 $classLoader = new Symfony\Component\ClassLoader\UniversalClassLoader();
 $classLoader->registerNamespaces(array(
     'PhpJobQueue' => __DIR__.'/lib',
-    'Symfony'     => __DIR__.'/vendor/symfony',
+    'Symfony'     => __DIR__.'/vendor/symfony/src',
     'Predis'      => __DIR__.'/vendor/predis/lib',
 ));
 $classLoader->register();
