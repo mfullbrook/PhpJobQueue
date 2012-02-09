@@ -9,8 +9,8 @@
  * file that was distributed with this source code.
  */
 
-require __DIR__.'/vendor/symfony/Symfony/Component/ClassLoader/UniversalClassLoader.php';
-require __DIR__.'/vendor/symfony/Symfony/Component/ClassLoader/DebugUniversalClassLoader.php';
+require __DIR__.'/vendor/symfony/src/Symfony/Component/ClassLoader/UniversalClassLoader.php';
+require __DIR__.'/vendor/symfony/src/Symfony/Component/ClassLoader/DebugUniversalClassLoader.php';
 
 $classLoader = new Symfony\Component\ClassLoader\UniversalClassLoader();
 $classLoader->registerNamespaces(array(
@@ -23,3 +23,6 @@ $classLoader->register();
 
 // enable Debug loader
 Symfony\Component\ClassLoader\DebugUniversalClassLoader::enable();
+
+// define the root of the project
+define('PHPJOBQUEUE_ROOT', __DIR__);
