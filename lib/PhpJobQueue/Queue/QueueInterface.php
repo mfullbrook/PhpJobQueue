@@ -18,12 +18,22 @@ use PhpJobQueue\Job\AbstractJob;
  */
 interface QueueInterface
 {
+    /**
+     * Add a Job to the queue
+     * @param PhpJobQueue\Job\AbstractJob
+     * @return string The ID of the enqueued job
+     */
     public function enqueue(AbstractJob $job);
     
     /**
-     * @return PhpJobQueue\Job\JobInterface
+     * @return PhpJobQueue\Job\AbstractJob
      */
     public function retrieve();
+    
+    /**
+     * Count the number of jobs in the queue
+     */
+    public function countJobs();
     
     public function getJobStatus();
     
