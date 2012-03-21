@@ -11,9 +11,12 @@
 
 namespace PhpJobQueue\Queue;
 
-use PhpJobQueue\Storage\Redis as RedisStorage;
-use PhpJobQueue\Job\AbstractJob;
+use PhpJobQueue\Job\Job;
 use PhpJobQueue\PhpJobQueue;
+use PhpJobQueue\Storage\Redis as RedisStorage;
+use PhpJobQueue\Exception\JobNotFoundException;
+use PhpJobQueue\Exception\JobCorruptException;
+use Monolog\Logger;
 
 /**
  * Redis implementation of the Queue
@@ -21,36 +24,53 @@ use PhpJobQueue\PhpJobQueue;
 class Redis implements QueueInterface
 {
     const QUEUE_PREFIX = 'queue:';
-    
+
     protected $name;
     
+    /**
+     * @var PhpJobQueue\PhpJobQueue
+     */
+    protected $phpJobQueue;
+    
+    /**
+     * @var PhpJobQueue\Storage\Redis
+     */
     protected $storage;
+    
+    /**
+     * @var Monolog\Logger
+     */
+    protected $logger;
     
     /**
      * Construct the Queue with a name and StorageInstance
      * @param string $name
-     * @param RedisStorage $storage
+     * @param PhpJobQueue\PhpJobQueue $phpJobQueue
+     * @param PhpJobQueue\Storage\Redis
      */
-    public function __construct($name, RedisStorage $storage)
+    public function __construct($name, PhpJobQueue $phpJobQueue, RedisStorage $storage)
     {
         $this->name = self::QUEUE_PREFIX . $name;
+        $this->phpJobQueue = $phpJobQueue;
         $this->storage = $storage;
+        $this->logger = $this->phpJobQueue->attachLogHandlers(new Logger('queue.redis'));
     }
     
     /**
      * {@inheritDoc}
      */
-    public function enqueue(AbstractJob $job)
+    public function enqueue(Job $job)
     {
         $id = PhpJobQueue::createUniqueId();
         
-        $details = array(
+        // store the job in a hash
+        $this->storage->hmset(self::idToKey($id), array(
             'class' => get_class($job),
-            'params' => $job->getParameters(),    
-        );
-        
-        // store the job
-        $this->storage->set("job:$id", json_encode($details));
+            'params' => json_encode($job->getParameters()),
+            'status' => Job::STATUS_WAITING,
+            'queue' => $this->name,
+            'queuedAt' => PhpJobQueue::getUtcDateString(),
+        ));
         
         // add the id to the queue
         $this->storage->rpush($this->name, $id);
@@ -63,9 +83,25 @@ class Redis implements QueueInterface
      */
     public function retrieve()
     {
+        // use lpop to find a job ID
+        $jobId = $this->storage->lpop($this->name);
         
+        if ($jobId) {
+            $this->logger->info(sprintf('Job ID %s was retrieved from %s', $jobId, $this));
+            
+            // fetch and return the job
+            try {
+                return $this->storage->getJob($jobId);
+            } catch (JobNotFoundException $e) {
+                $this->logger->warn(sprintf('Job %s in queue %s was not found', $jobId, $this->name));
+            } catch (JobCorruptException $e) {
+                $this->logger->warn(sprintf('Job %s in queue %s is corrupt', $jobId, $this->name));
+            }
+        }
+        
+        return null;
     }
-    
+        
     /**
      * {@inheritDoc}
      */
@@ -74,36 +110,11 @@ class Redis implements QueueInterface
         return $this->storage->llen($this->name);
     }
     
-    /**
-     * {@inheritDoc}
+    /** 
+     * Convert the queue to a string representation
      */
-    public function getJobStatus()
+    public function __toString()
     {
-        
+        return sprintf('{RedisQueue:%s}', $this->name);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public function setJobStatus()
-    {
-        
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public function jobCompleted()
-    {
-        
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public function jobFailed()
-    {
-        
-    }
-    
 }

@@ -23,7 +23,7 @@ class AbstractWorker
     
     protected $logger;
 
-    protected $queues;
+    protected $queuesFilter = array();
     
     
     
@@ -46,7 +46,30 @@ class AbstractWorker
      */
     public function setQueues(Array $queues)
     {
-        $this->queues = $queues;
+        $this->queuesFilter = $queues;
     }
     
+    /**
+	 * On supported systems (with the PECL proctitle module installed), update
+	 * the name of the currently running process to indicate the current state
+	 * of a worker.
+	 *
+	 * @param string $status The updated process title.
+	 */
+	private function updateProcLine($status)
+	{
+		if (function_exists('setproctitle')) {
+			setproctitle('PhpJobQueue: ' . $status);
+		}
+	}
+	
+	/**
+	 * Return the logger instance
+	 *
+	 * @return Monolog\Logger
+	 */
+	public function getLogger()
+	{
+	    return $this->logger;
+	}
 }

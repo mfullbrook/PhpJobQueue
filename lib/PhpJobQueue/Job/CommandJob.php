@@ -11,9 +11,9 @@
 
 namespace PhpJobQueue\Job;
 
-use PhpJobQueue\Worker\WorkerInterface;
+use PhpJobQueue\Worker\AbstractWorker;
 
-class CommandJob extends AbstractJob
+class CommandJob extends Job
 {
     protected $command;
     
@@ -22,8 +22,9 @@ class CommandJob extends AbstractJob
         $this->parameters['command'] = $command;
     }
     
-    public function execute(WorkerInterface $worker)
+    public function perform(AbstractWorker $worker)
     {
-        passthru($this->parameters['command']);
+        $lastline = exec($this->parameters['command']);
+        $worker->getLogger()->info(sprintf('Last line from %s = %s', $this, $lastline));
     }
 }

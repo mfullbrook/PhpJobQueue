@@ -1,7 +1,9 @@
 
 redis:
     parameters:
-        - tcp://127.0.0.1:6379
+        - tcp://10.0.0.1:6380
+    options:
+        foo: bar
     
 queues:
     - { name: default, priority: 0 }
@@ -9,8 +11,8 @@ queues:
 
 general:
     job_ttls:
-        success: 3600
-        failure: 
+        success: 86400
+        failure: 43200
     log:
         enabled: true
         level: debug
@@ -19,3 +21,6 @@ general:
         interval: 2
         max_duration: 20
         max_jobs: 100
+
+extra:
+    option: test

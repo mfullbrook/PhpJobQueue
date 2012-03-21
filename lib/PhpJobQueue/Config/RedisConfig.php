@@ -36,7 +36,9 @@ class RedisConfig
             'tcp://127.0.0.1:6379'
         );
 
-        $this->options = array();
+        $this->options = array(
+            'prefix' => self::DEFAULT_PREFIX
+        );
     }
     
     public function initialise($input)

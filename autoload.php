@@ -21,8 +21,5 @@ $classLoader->registerNamespaces(array(
 ));
 $classLoader->register();
 
-// enable Debug loader
-Symfony\Component\ClassLoader\DebugUniversalClassLoader::enable();
-
 // define the root of the project
 define('PHPJOBQUEUE_ROOT', __DIR__);

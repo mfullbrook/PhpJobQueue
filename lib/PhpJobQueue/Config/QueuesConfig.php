@@ -12,19 +12,18 @@
 namespace PhpJobQueue\Config;
 
 use PhpJobQueue\PhpJobQueue;
+use PhpJobQueue\Exception\QueueNotFoundException;
 
 /**
  * Define the queues, priorities and any other queue related configuration.
  * Implements Iterator in order of priority (from highest to lowest)
  * Implements ArrayAccess to access a queue configuration by name
  */
-class QueuesConfig implements \Iterator
+class QueuesConfig implements \IteratorAggregate
 {
     protected $queues;
     
     protected $priorities;
-    
-    protected $iteratorPosition;
     
     protected $configuration;
     
@@ -35,7 +34,6 @@ class QueuesConfig implements \Iterator
     {
         $this->queues = array(PhpJobQueue::getDefaultQueueName());
         $this->priorities = array(0);
-        $this->iteratorPosition = 0;
     }
     
     /**
@@ -44,7 +42,7 @@ class QueuesConfig implements \Iterator
     public function initialise($input)
     {
         if (!is_array($input)) {
-            throw new \InvalidArgumentException('The `redis` configuration section is invalid.');
+            throw new \InvalidArgumentException('The `queues` configuration section is invalid.');
         }
         
         $queues = array();
@@ -66,7 +64,7 @@ class QueuesConfig implements \Iterator
     }
     
     /**
-     * Returns the position bad on the queue name
+     * Returns the position of the queue name
      */
     protected function getPosition($name)
     {
@@ -94,43 +92,27 @@ class QueuesConfig implements \Iterator
     }
     
     /**
-     * Iterator method: public mixed current ( void )
+     * IteratorAggregate method
+     *
+     * @return PhpJobQueue\Config\QueuesIterator
      */
-    public function current()
+    public function getIterator()
     {
-        return $this->queues[ $this->iteratorPosition ];
+        return new QueuesIterator($this->queues);
     }
     
     /**
-     * Iterator method: abstract public scalar key ( void )
+     * Returns an iterator which contains a subset of queues
+     *
+     * @return PhpJobQueue\Config\QueuesIterator
      */
-    public function key()
+    public function getFilteredIterator($filter = array())
     {
-        return $this->iteratorPosition;
-    }
-    
-    /**
-     * Iterator method: abstract public void next ( void )
-     */
-    public function next()
-    {
-        $this->iteratorPosition++;
-    }
-    
-    /**
-     * Iterator method: abstract public void rewind ( void )
-     */
-    public function rewind()
-    {
-        $this->iteratorPosition = 0;
-    }
-    
-    /**
-     * Iterator method: abstract public boolean valid ( void )
-     */
-    public function valid()
-    {
-        return isset($this->queues[$this->iteratorPosition]);
+        if (!is_array($filter) || !count($filter)) {
+            throw new \InvalidArgumentException('getFilteredIterator expects an array of queue names');
+        } 
+        
+        return new QueuesIterator(array_values(array_intersect($this->queues, $filter)));
     }
     
     /**

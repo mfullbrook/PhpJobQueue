@@ -11,7 +11,7 @@
 
 namespace PhpJobQueue\Queue;
 
-use PhpJobQueue\Job\AbstractJob;
+use PhpJobQueue\Job\Job;
 
 /**
  * Interface that describes an individual job queue.
@@ -20,13 +20,13 @@ interface QueueInterface
 {
     /**
      * Add a Job to the queue
-     * @param PhpJobQueue\Job\AbstractJob
+     * @param PhpJobQueue\Job\Job
      * @return string The ID of the enqueued job
      */
-    public function enqueue(AbstractJob $job);
+    public function enqueue(Job $job);
     
     /**
-     * @return PhpJobQueue\Job\AbstractJob
+     * @return PhpJobQueue\Job\Job Returns a job or null if there is nothing in the queue 
      */
     public function retrieve();
     
@@ -34,13 +34,5 @@ interface QueueInterface
      * Count the number of jobs in the queue
      */
     public function countJobs();
-    
-    public function getJobStatus();
-    
-    public function setJobStatus();
-    
-    public function jobCompleted();
-    
-    public function jobFailed();
     
 }

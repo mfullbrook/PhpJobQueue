@@ -13,9 +13,10 @@ namespace PhpJobQueue;
 
 use PhpJobQueue\Config\ConfigurationInterface;
 use PhpJobQueue\Config\Configuration;
-use PhpJobQueue\Config\QueueNotFoundException;
-use PhpJobQueue\Job\AbstractJob;
+use PhpJobQueue\Exception\QueueNotFoundException;
+use PhpJobQueue\Job\Job;
 use Monolog\Logger;
+use DateTime, DateTimeZone;
 
 /**
  * Main class for PhpJobQueue
@@ -47,6 +48,11 @@ class PhpJobQueue implements \ArrayAccess
      */
     protected $logger;
     
+    protected $classes = array(
+        'queue' => 'PhpJobQueue\\Queue\\Redis',
+        'storage' => 'PhpJobQueue\\Storage\\Redis'
+    );
+    
     /**
      * Class constructor
      */
@@ -72,12 +78,29 @@ class PhpJobQueue implements \ArrayAccess
     }
     
     /**
+     * Set the class for a given identifier
+     */
+    public function setClass($key, $class)
+    {
+        if (array_key_exists($key, $this->classes)) {
+            $this->classes[$key] = $class;
+        } else {
+            throw \InvalidArgumentException('The class key you have requested to override is unknown.');
+        }
+    }
+    
+    public function getClass($key)
+    {
+        return $this->classes[$key];
+    }
+    
+    /**
      * Adds a job to the specified queue
      *
-     * @param AbstractJob $job The job to add to the end of the queue
+     * @param Job $job The job to add to the end of the queue
      * @param string $queueName The name of the queue, if not supplied uses default queue
      */
-    public function enqueue(AbstractJob $job, $queueName = null)
+    public function enqueue(Job $job, $queueName = null)
     {
         if (is_null($queueName)) {
             $queueName = static::DEFAULT_QUEUE;
@@ -102,8 +125,8 @@ class PhpJobQueue implements \ArrayAccess
     
     /**
      * Factory method for fetching a Queue instance
-     * @todo allow hard coded redis queue to be switched
-     * @throws PhpJobQueue\Config\QueueNotFoundException
+     *
+     * @throws PhpJobQueue\Exception\QueueNotFoundException
      */
     protected function getQueue($name)
     {
@@ -111,7 +134,8 @@ class PhpJobQueue implements \ArrayAccess
         $this->config->queues->hasQueue($name, true);
         
         if (!isset($this->queues[$name])) {
-            $this->queues[$name] = new \PhpJobQueue\Queue\Redis($name, $this->getStorage());
+            $class = $this->getClass('queue');
+            $this->queues[$name] = new $class($name, $this, $this->getStorage());
         }
         return $this->queues[$name];
     }
@@ -123,7 +147,8 @@ class PhpJobQueue implements \ArrayAccess
     protected function getStorage()
     {
         if (!isset($this->storage)) {
-            $this->storage = new \PhpJobQueue\Storage\Redis($this->config->redis);
+            $class = $this->getClass('storage');
+            $this->storage = new $class($this->config->redis);
             $this->logger->debug('Storage (Predis) initialised');
         }
         return $this->storage;
@@ -176,7 +201,7 @@ class PhpJobQueue implements \ArrayAccess
         $this->config->general->attachLogHandlers($logger);
         return $logger;
     }
-    
+
     /**
      * Static method using late static binding to retrieve the default queue name
      * @return string
@@ -185,7 +210,7 @@ class PhpJobQueue implements \ArrayAccess
     {
         return static::DEFAULT_QUEUE;
     }
-    
+
     /**
      * Returns a SHA1 style unique ID
      * @return string
@@ -193,5 +218,12 @@ class PhpJobQueue implements \ArrayAccess
     public static function createUniqueId()
     {
         return sha1(uniqid());
+    }
+    
+    
+    public static function getUtcDateString()
+    {
+        $d = new DateTime('now', new DateTimeZone(DateTimeZone::UTC));
+        return $d->format('r');
     }
 }

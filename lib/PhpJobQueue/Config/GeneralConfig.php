@@ -22,6 +22,13 @@ use Monolog\Handler\NullHandler;
  */
 class GeneralConfig
 {
+    const LOG_LEVEL_DEBUG = 100;
+    const LOG_LEVEL_INFO = 200;
+    const LOG_LEVEL_WARNING = 300;
+    const LOG_LEVEL_ERROR = 400;
+    const LOG_LEVEL_CRITICAL = 500;
+    const LOG_LEVEL_ALERT = 550;
+    
     // set the options and their defaults...
     
     /**
@@ -50,9 +57,19 @@ class GeneralConfig
     protected $logPath = 'phpjobqueue.log';
     
     /**
-     * The number of seconds a work should sleep when waiting for a new job
+     * The number of seconds a work should wait before reattempting to find a job
      */
-    protected $workerSleep = 5;
+    protected $workerInterval = 5;
+    
+    /**
+     * The duration after which a child worker will shutdown
+     */
+    protected $workerMaxDuration = 600;
+    
+    /**
+     * The number of jobs a child worker will process before shutting down
+     */
+    protected $workerMaxJobs = 200;
     
 
     // the following are not options...
@@ -66,7 +83,9 @@ class GeneralConfig
         'logEnabled',
         'logLevel',
         'logPath',
-        'workerSleep',
+        'workerInterval',
+        'workerMaxDuration',
+        'workerMaxJobs',
     );
     
     /**
@@ -92,6 +111,8 @@ class GeneralConfig
     
     /**
      * Process the input configuration
+     *
+     * @param array $input
      */
     public function initialise($input)
     {
@@ -100,15 +121,17 @@ class GeneralConfig
         }
         
         // process the TTLs
-        foreach (array('success' => 'jobTtlSuccess', 'failure' => 'jobTtlFailure') as $key => $property) {
-            if (array_key_exists($key, $input['job_ttls'])) {
-                $v = $input['job_ttls'][$key];
-                $this->$property = $v ? $v : false;
+        if (isset($input['job_ttls'])) {
+            foreach (array('success' => 'jobTtlSuccess', 'failure' => 'jobTtlFailure') as $key => $property) {
+                if (array_key_exists($key, $input['job_ttls'])) {
+                    $v = $input['job_ttls'][$key];
+                    $this->$property = $v ? $v : false;
+                }
             }
         }
         
         // log enabled?
-        if ($input['log']['enabled'] == false) {
+        if (isset($input['log']['enabled']) && $input['log']['enabled']== false) {
             $this->logEnabled = false;
         }
         
@@ -117,7 +140,7 @@ class GeneralConfig
             if (isset($input['log']['level'])) {
                 $level = array_search(strtoupper($input['log']['level']), self::$logLevels);
                 if ($level === false) {
-                    throw \InvalidArgumentException('The `general.log.level` configuration options must be one of: debug, info, warning, error, critical or alert.');
+                    throw new \InvalidArgumentException('The `general.log.level` configuration options must be one of: debug, info, warning, error, critical or alert.');
                 }
                 $this->logLevel = $level;
             }
@@ -136,9 +159,16 @@ class GeneralConfig
             $this->logPath = $path;
         }
         
-        // worker sleep
-        if (isset($input['worker_sleep']) && is_integer($input['worker_sleep'])) {
-            $this->workerSleep = $input['worker_sleep'];
+        // process worker options
+        if (isset($input['worker'])) {
+            $w = $input['worker'];
+            
+            $optionsHash = array('interval' => 'workerInterval', 'max_duration' => 'workerMaxDuration', 'max_jobs' => 'workerMaxJobs');
+            foreach ($optionsHash as $key => $property) {
+                if (isset($w[$key]) && is_integer($w[$key]) && $w[$key] > 1) {
+                    $this->$property = $w[$key];
+                }
+            }
         }
     }
     
@@ -147,7 +177,7 @@ class GeneralConfig
      */
     public function __get($option) {
         if (!in_array($option, self::$publicOptions)) {
-            throw new \Exception("Unable to find option '$option'");
+            throw new \RuntimeException("Unable to find option '$option'");
         }
         return $this->$option;
     }
@@ -165,7 +195,7 @@ class GeneralConfig
             if ($this->logEnabled) {
                 $this->logHandlers[] = new StreamHandler($this->logPath, $this->logLevel);
             } else {
-                $this->logHandlers[] = new NullHandler(Monolog\Logger::DEBUG);
+                $this->logHandlers[] = new NullHandler(\Monolog\Logger::DEBUG);
             }
         }
         
