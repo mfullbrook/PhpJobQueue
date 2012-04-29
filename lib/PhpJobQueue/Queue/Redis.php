@@ -61,10 +61,11 @@ class Redis implements QueueInterface
      */
     public function enqueue(Job $job)
     {
-        $id = PhpJobQueue::createUniqueId();
+        $id = $this->createJobId();
+        $job->setId($id);
         
         // store the job in a hash
-        $this->storage->hmset(self::idToKey($id), array(
+        $this->storage->hmset(RedisStorage::idToKey($id), array(
             'class' => get_class($job),
             'params' => json_encode($job->getParameters()),
             'status' => Job::STATUS_WAITING,
@@ -116,5 +117,10 @@ class Redis implements QueueInterface
     public function __toString()
     {
         return sprintf('{RedisQueue:%s}', $this->name);
+    }
+    
+    public function createJobId()
+    {
+        return sha1(uniqid());
     }
 }

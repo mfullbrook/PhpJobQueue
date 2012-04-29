@@ -35,4 +35,8 @@ interface QueueInterface
      */
     public function countJobs();
     
+    /**
+     * @return string an identifier to be used for a Job
+     */
+    public function createJobId();
 }

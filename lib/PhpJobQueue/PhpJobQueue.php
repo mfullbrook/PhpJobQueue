@@ -78,6 +78,14 @@ class PhpJobQueue implements \ArrayAccess
     }
     
     /**
+     * @return Monolog\Logger
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+    
+    /**
      * Set the class for a given identifier
      */
     public function setClass($key, $class)
@@ -85,7 +93,7 @@ class PhpJobQueue implements \ArrayAccess
         if (array_key_exists($key, $this->classes)) {
             $this->classes[$key] = $class;
         } else {
-            throw \InvalidArgumentException('The class key you have requested to override is unknown.');
+            throw new \InvalidArgumentException('The class key you have requested to override is unknown.');
         }
     }
     
@@ -210,20 +218,11 @@ class PhpJobQueue implements \ArrayAccess
     {
         return static::DEFAULT_QUEUE;
     }
-
-    /**
-     * Returns a SHA1 style unique ID
-     * @return string
-     */
-    public static function createUniqueId()
-    {
-        return sha1(uniqid());
-    }
     
     
     public static function getUtcDateString()
     {
-        $d = new DateTime('now', new DateTimeZone(DateTimeZone::UTC));
+        $d = new DateTime('now', new DateTimeZone('UTC'));
         return $d->format('r');
     }
 }
