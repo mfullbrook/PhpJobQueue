@@ -15,6 +15,8 @@ use Predis\Client;
 use PhpJobQueue\PhpJobQueue;
 use PhpJobQueue\Config\RedisConfig;
 use PhpJobQueue\Job\Job;
+use PhpJobQueue\Exception\JobCorruptException;
+use PhpJobQueue\Exception\JobNotFoundException;
 
 /**
  * Extend Predis Client so that we can manipulate the config
@@ -45,26 +47,30 @@ class Redis extends Client implements StorageInterface
      public function getJob($id)
      {
          $hash = $this->hgetall(self::idToKey($id));
-
+         
          if ($hash === null) {
              throw new JobNotFoundException();
+         }
+         
+         if (empty($hash['params'])) {
+             throw new JobCorruptException('The params field was empty', JobCorruptException::EMPTY_PARAMS);
          }
 
          $params = json_decode($hash['params'], true);
 
          if (empty($hash['class'])) {
-             throw new JobCorruptException('The class field was empty');
+             throw new JobCorruptException('The class field was empty', JobCorruptException::EMPTY_CLASS);
          }
 
          if ($params === null) {
-             throw new JobCorruptException('The params field did not decode successfully');
+             throw new JobCorruptException('The params field did not decode successfully', JobCorruptException::JSON_DECODE_FAILED);
          }
 
          $job = new $hash['class']();
          $job->setId($id);
          $job->setParameters($params);
          $job->setStatus($hash['status']);
-         $job->setQueue($hash['queue']);
+         $job->setQueueName($hash['queue']);
          $job->setQueuedAt($hash['queuedAt']);
          if (isset($hash['startedAt'])) {
              $job->setStartedAt($hash['startedAt']);
