@@ -16,6 +16,9 @@ use PhpJobQueue\Worker\AbstractWorker;
 class CommandJob extends Job
 {
     protected $command;
+    protected $output;
+    protected $lastLine;
+    protected $returnCode;
     
     public function setCommand($command)
     {
@@ -24,7 +27,23 @@ class CommandJob extends Job
     
     public function perform(AbstractWorker $worker)
     {
-        $lastline = exec($this->parameters['command']);
-        $worker->getLogger()->info(sprintf('Last line from %s = %s', $this, $lastline));
+        unset($this->lastLine, $this->output, $this->returnCode);
+        $this->lastLine = exec($this->parameters['command'], $this->output, $this->returnCode);
+        $worker->getLogger()->info(sprintf('Last line from %s = %s', $this, $this->lastLine));
+    }
+    
+    public function getLastLine()
+    {
+        return $this->lastLine;
+    }
+    
+    public function getOutput()
+    {
+        return $this->output;
+    }
+    
+    public function getReturnCode()
+    {
+        return $this->returnCode;
     }
 }
