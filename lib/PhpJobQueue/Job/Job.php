@@ -40,9 +40,9 @@ abstract class Job
         $this->id = $id;
     }
     
-    public function getId($id)
+    public function getId()
     {
-        return $id;
+        return $this->id;
     }
     
     public function getParameters()
