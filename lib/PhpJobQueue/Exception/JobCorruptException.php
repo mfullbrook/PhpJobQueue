@@ -13,4 +13,7 @@ namespace PhpJobQueue\Exception;
 
 class JobCorruptException extends \Exception
 {
+    const EMPTY_CLASS = 1;
+    const EMPTY_PARAMS = 2;
+    const JSON_DECODE_FAILED = 3;
 }
