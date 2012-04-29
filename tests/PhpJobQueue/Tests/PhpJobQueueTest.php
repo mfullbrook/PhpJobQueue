@@ -11,12 +11,16 @@
 
 namespace PhpJobQueue\Tests;
 
-use PhpJobQueue\PhpJobQueue;
+use PhpJobQueue\Tests\Mock\PhpJobQueue;
 use PhpJobQueue\Config\Configuration;
 use PhpJobQueue\Config\RedisConfig;
 
-class PhpJobQueueTest extends \PHPUnit_Framework_Testcase
+
+class PhpJobQueueTest extends TestCase
 {
+    protected $queueMock;
+    protected $storageMock;
+    
     public function testConstructor()
     {
         $config = new Configuration();
@@ -30,17 +34,41 @@ class PhpJobQueueTest extends \PHPUnit_Framework_Testcase
         $this->assertEquals(new RedisConfig(), $pjq->getConfig('redis'));
     }
     
-    private function PhpJobQueueFactory()
+    private function PhpJobQueueFactoryWithMocks()
     {
-        $this->pjq = new PhpJobQueue(array(
-            
-        ));
-        $this->pjq->setClass('queue', ''); // stub
-        $this->pjq->setClass('storage', ''); // stub
+        $this->pjq = new PhpJobQueue();
+        
+        // create queue mock
+        $this->queueMock =
+            $this->getMockBuilder('PhpJobQueue\\Queue\\Redis')
+                 ->disableOriginalConstructor()
+                 ->getMock();
+        $c = get_class($this->queueMock);
+        //$m2 = new $c();
+        
+        //$this->assertEquals($c, $m2);
+        
+        $this->pjq->setClass('queue', ''); // mock
+        $this->pjq->setClass('storage', ''); // mock
     }
     
+    /**
+     * @expectedException InvalidArgumentException
+     */
     public function testSetUnknownClassKey()
     {
-        $this
+        $pjq = new PhpJobQueue();
+        $pjq->setClass('foo', 'bar');
+    }
+    
+    public function testEnqueue()
+    {
+        $this->PhpJobQueueFactoryWithMocks();
+    }
+    
+    public function testGetUtcDateString()
+    {
+        date_default_timezone_set('UTC');
+        $this->assertEquals(date('r'), PhpJobQueue::getUtcDateString());
     }
 }
