@@ -134,11 +134,12 @@ class RedisTest extends TestCase
     
     public function testJobStarted()
     {
+        /*
         $mock = $this->getRedisMock(array('hset'));
         $mock->expects($this->exactly(2))
             ->method('hset')
             ->with('')
-        
+        */
         $this->markTestIncomplete('Assert Job had status and startedAt set');
     }
     

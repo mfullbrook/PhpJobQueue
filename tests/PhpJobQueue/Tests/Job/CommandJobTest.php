@@ -17,6 +17,10 @@ use PhpJobQueue\Tests\Mock\PhpJobQueue;
 
 class CommandJobTest extends TestCase
 {
+    
+    /**
+     * @covers PhpJobQueue\Job\CommandJob::setCommand
+     */
     public function testSetCommand()
     {
         $job = new CommandJob();
@@ -25,6 +29,12 @@ class CommandJobTest extends TestCase
         $this->assertEquals('test-command', $parameters['command']);
     }
     
+    /**
+     * @covers PhpJobQueue\Job\CommandJob::perform
+     * @covers PhpJobQueue\Job\CommandJob::getLastLine
+     * @covers PhpJobQueue\Job\CommandJob::getOutput
+     * @covers PhpJobQueue\Job\CommandJob::getReturnCode
+     */
     public function testPerform()
     {
         $pjq = new PhpJobQueue();

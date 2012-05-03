@@ -75,8 +75,6 @@ class RedisTest extends TestCase
      */
     public function testRetrieve()
     {
-        $logger = $this->loggerFactory();
-        
         $phpJobQueue = new PhpJobQueue();
         
         $storage = $this->getMock('PhpJobQueue\\Storage\\Redis', array('lpop', 'getJob'), array(new RedisConfig()));
@@ -84,34 +82,70 @@ class RedisTest extends TestCase
         $queueName = 'testqueue';
         
         $storage
-            ->expects($this->once())
+            ->expects($this->any())
             ->method('lpop')
             ->with($this->equalTo(Redis::QUEUE_PREFIX . $queueName))
-            ->will($this->returnValue('newJobId'));
+            ->will($this->onConsecutiveCalls('newJobId', 'foo', 'bar'));
         
         $testJob = new TestJob();
         $testJob->setId('newJobId');
         
-        $this->markTestIncomplete();
-        
         $storage
-            ->expects($this->once())
+            ->expects($this->any())
             ->method('getJob')
-            ->with($this->equalTo('newJobId'))
-            ->will($this->returnValue($testJob));
+            ->will($this->returnCallback(function($id) use($testJob) {
+                if ($id == 'newJobId')
+                    return $testJob;
+                else if ($id == 'foo')
+                    throw new \PhpJobQueue\Exception\JobNotFoundException();
+                else if ($id == 'bar')
+                    throw new \PhpJobQueue\Exception\JobCorruptException();
+            } ));
         
         $redisQueue = new Redis($queueName, $phpJobQueue, $storage);
         $retrievedJob = $redisQueue->retrieve();
         
         $this->assertEquals($testJob, $retrievedJob);
         
+        // test the exceptions
+        $redisQueue->retrieve();
+        $this->assertContains(array(
+            'message' => 'Job foo in queue queue:testqueue was not found',
+            'level' => 300,
+            'level_name' => 'WARNING',
+            'channel' => 'queue.redis'
+        ), $phpJobQueue->getBufferedLogs(\Monolog\Logger::WARNING));
+        
+        $redisQueue->retrieve();
+        $this->assertContains(array(
+            'message' => 'Job bar in queue queue:testqueue is corrupt',
+            'level' => 300,
+            'level_name' => 'WARNING',
+            'channel' => 'queue.redis'
+        ), $phpJobQueue->getBufferedLogs(\Monolog\Logger::WARNING));
+        
+    }
+    
+    /**
+     * @covers PhpJobQueue\Queue\Redis::countJobs
+     */
+    public function testCountJobs()
+    {
+        $phpJobQueue = new PhpJobQueue();
+        
+        $storage = $this->getMock('PhpJobQueue\\Storage\\Redis', array('llen'), array(new RedisConfig()));
+        
+        $queueName = 'testqueue';
+        
         $storage
             ->expects($this->once())
-            ->method('getJob')
-            ->with($this->equalTo('foo'));
-//            ->will($this->throwException(new \PhpJobQueue\Exception\JobNotFoundException));
+            ->method('llen')
+            ->with($this->equalTo(Redis::QUEUE_PREFIX . $queueName))
+            ->will($this->returnValue(5));
+            
+        $redisQueue = new Redis($queueName, $phpJobQueue, $storage);
         
-        $storage->getJob('foo');
+        $this->assertEquals(5, $redisQueue->countJobs());
     }
     
     public function testCreateJobId()

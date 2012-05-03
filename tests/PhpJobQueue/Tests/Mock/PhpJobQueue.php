@@ -24,4 +24,29 @@ class PhpJobQueue extends \PhpJobQueue\PhpJobQueue
         $logger->pushHandler($this->handler);
         return $logger;        
     }
+    
+    public function getBufferedLogs($filterLevel = null)
+    {
+        $buffer = $this->handler->getBuffer();
+        $filtered = array();
+        
+        for ($i=0; $i<count($buffer); $i++) {
+            // skip any items that have a level lower than the filter param
+            if ($filterLevel && $buffer[$i]['level'] < $filterLevel) {
+                continue;
+            }
+            // strip the the time stamp and potentially empty stuff
+            unset($buffer[$i]['datetime']);
+            if (empty($buffer[$i]['context'])) {
+                unset($buffer[$i]['context']);
+            }
+            if (empty($buffer[$i]['extra'])) {
+                unset($buffer[$i]['extra']);
+            }
+            
+            $filtered[] = $buffer[$i];
+        }
+        
+        return $filtered;
+    }
 }

@@ -71,4 +71,48 @@ class PhpJobQueueTest extends TestCase
         date_default_timezone_set('UTC');
         $this->assertEquals(date('r'), PhpJobQueue::getUtcDateString());
     }
+    
+    /**
+     * @covers PhpJobQueue\PhpJobQueue::offsetExists
+     */
+    public function testOffsetExists()
+    {
+        $pjq = new PhpJobQueue();
+        $this->assertTrue(isset($pjq[$pjq->getDefaultQueueName()]));
+        
+        $this->assertFalse(isset($pjq['foo']));
+    }
+    
+    /**
+     * @covers PhpJobQueue\PhpJobQueue::offsetGet
+     * @covers PhpJobQueue\PhpJobQueue::getQueue
+     */
+    public function testOffsetGet()
+    {
+        $pjq = new PhpJobQueue();
+        $implements = class_implements($pjq[$pjq->getDefaultQueueName()]);
+        $this->assertContains('PhpJobQueue\Queue\QueueInterface', $implements);
+    }
+    
+    /**
+     * @expectedException BadMethodCallException
+     * @covers PhpJobQueue\PhpJobQueue::offsetSet
+     */
+    public function testOffsetSet()
+    {
+        $pjq = new PhpJobQueue();
+        $pjq['a'] = 'b';
+    }
+    
+    /**
+     * @expectedException BadMethodCallException
+     * @covers PhpJobQueue\PhpJobQueue::offsetUnset
+     */
+    public function testOffsetUnset()
+    {
+        $pjq = new PhpJobQueue();
+        unset($pjq['a']);
+    }
+    
+    
 }

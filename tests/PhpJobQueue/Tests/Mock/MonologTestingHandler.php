@@ -24,4 +24,9 @@ class MonologTestingHandler extends BufferHandler
     {
         // do nothing
     }
+    
+    public function getBuffer()
+    {
+        return $this->buffer;
+    }
 }

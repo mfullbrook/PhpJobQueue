@@ -15,6 +15,24 @@ use PhpJobQueue\Tests\TestCase;
 
 class JobTest extends TestCase
 {
+    /**
+     * @covers PhpJobQueue\Job\Job::setId
+     * @covers PhpJobQueue\Job\Job::getId
+     * @covers PhpJobQueue\Job\Job::setParameters
+     * @covers PhpJobQueue\Job\Job::getParameters
+     * @covers PhpJobQueue\Job\Job::setStatus
+     * @covers PhpJobQueue\Job\Job::getStatus
+     * @covers PhpJobQueue\Job\Job::setQueueName
+     * @covers PhpJobQueue\Job\Job::getQueueName
+     * @covers PhpJobQueue\Job\Job::setQueuedAt
+     * @covers PhpJobQueue\Job\Job::getQueuedAt
+     * @covers PhpJobQueue\Job\Job::setStartedAt
+     * @covers PhpJobQueue\Job\Job::getStartedAt
+     * @covers PhpJobQueue\Job\Job::setCompletedAt
+     * @covers PhpJobQueue\Job\Job::getCompletedAt
+     * @covers PhpJobQueue\Job\Job::setErrorDetails
+     * @covers PhpJobQueue\Job\Job::getErrorDetails
+     */
     public function testSetterAndGetters()
     {
         $job = $this->getMockForAbstractClass('PhpJobQueue\Job\Job');
@@ -46,6 +64,9 @@ class JobTest extends TestCase
         $this->assertEquals(array('error' => 'details'), $job->getErrorDetails());    
     }
     
+    /**
+     * @covers PhpJobQueue\Job\Job::__toString
+     */
     public function testToString()
     {
         // sprintf('{%s:%s}', basename(str_replace('\\', '/', get_class($this))), $this->id);
