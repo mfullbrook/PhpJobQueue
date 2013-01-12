@@ -9,17 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace PhpJobQueue\Tests\Mock;
+namespace PhpJobQueue\Exception;
 
-use PhpJobQueue\Job\Job;
-
-class TestJob extends Job
+class JobInvalidException extends \Exception
 {
-    public function perform(\PhpJobQueue\Worker\AbstractWorker $worker)
-    {
-    }
-    
-    public function validate()
-    {
-    }
+    const NO_APP_PATH = 1;
+    const NO_SERVICE_ID = 2;
+    const NO_METHOD = 3;
+    const NO_ENV = 4;
 }

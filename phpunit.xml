@@ -21,4 +21,8 @@
             <directory suffix=".php">./lib/PhpJobQueue</directory>
         </whitelist>
     </filter>
+
+    <logging>
+        <log type="coverage-html" target="build/coverage"/>
+    </logging>
 </phpunit>

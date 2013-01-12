@@ -13,18 +13,10 @@ namespace PhpJobQueue\Tests\Storage\Redis;
 
 use PhpJobQueue\Tests\TestCase;
 use PhpJobQueue\Storage\Redis;
-
+use PhpJobQueue\Tests\Mock\TestJob;
 
 class RedisTest extends TestCase
 {
-    private function getRedisMock(Array $methods)
-    {
-        return $this->getMockBuilder('PhpJobQueue\\Storage\\Redis')
-            ->disableOriginalConstructor()
-            ->setMethods($methods)
-            ->getMock();
-    }
-    
     public function testIdToKey()
     {
         $this->assertEquals(Redis::JOB_PREFIX.'id', Redis::idToKey('id'));
@@ -36,7 +28,7 @@ class RedisTest extends TestCase
      */
     public function testGetJobNotFound()
     {
-        $mock = $this->getRedisMock(array('hgetall'));
+        $mock = $this->getRedisStorageMock(array('hgetall'));
         $mock->expects($this->once())
              ->method('hgetall')
              ->will($this->returnValue(null));
@@ -53,7 +45,7 @@ class RedisTest extends TestCase
     {
         $hash = array();
         
-        $mock = $this->getRedisMock(array('hgetall'));
+        $mock = $this->getRedisStorageMock(array('hgetall'));
         $mock->expects($this->once())
              ->method('hgetall')
              ->will($this->returnValue($hash));
@@ -70,7 +62,7 @@ class RedisTest extends TestCase
     {
         $hash = array('params' => 'NULL');
         
-        $mock = $this->getRedisMock(array('hgetall'));
+        $mock = $this->getRedisStorageMock(array('hgetall'));
         $mock->expects($this->once())
              ->method('hgetall')
              ->will($this->returnValue($hash));
@@ -87,7 +79,7 @@ class RedisTest extends TestCase
     {
         $hash = array('class' => 'PhpJobQueue\\Job\\Job', 'params' => '[foo');
         
-        $mock = $this->getRedisMock(array('hgetall'));
+        $mock = $this->getRedisStorageMock(array('hgetall'));
         $mock->expects($this->once())
              ->method('hgetall')
              ->will($this->returnValue($hash));
@@ -122,7 +114,7 @@ class RedisTest extends TestCase
         $job->setCompletedAt(date('r'));
         $job->setErrorDetails('errorDetails is currently just a string');
         
-        $mock = $this->getRedisMock(array('hgetall'));
+        $mock = $this->getRedisStorageMock(array('hgetall'));
         $mock->expects($this->once())
              ->method('hgetall')
              ->will($this->returnValue($hash));
@@ -132,26 +124,36 @@ class RedisTest extends TestCase
         $this->assertEquals($job, $returnedJob);
     }
     
+    /**
+     * @covers PhpJobQueue\Storage\Redis::jobStarted
+     */
     public function testJobStarted()
     {
-        /*
-        $mock = $this->getRedisMock(array('hset'));
+        $mock = $this->getRedisStorageMock(array('hset'));
         $mock->expects($this->exactly(2))
-            ->method('hset')
-            ->with('')
-        */
-        $this->markTestIncomplete('Assert Job had status and startedAt set');
+            ->method('hset');
+        
+        $job = new TestJob();
+        $mock->jobStarted($job);
     }
     
     public function testJobCompleted()
     {
+        $mock = $this->getRedisStorageMock(array('hset'));
+        $mock->expects($this->exactly(2))
+            ->method('hset');
         
-        $this->markTestIncomplete('Assert Job had status and completedAt set');
+        $job = new TestJob();
+        $mock->jobCompleted($job);
     }
     
     public function testJobFailed()
     {
+        $mock = $this->getRedisStorageMock(array('hset'));
+        $mock->expects($this->exactly(2))
+            ->method('hset');
         
-        $this->markTestIncomplete('Assert Job had status and errorDetails set');
+        $job = new TestJob();
+        $mock->jobFailed($job, 'test error');
     }
 }

@@ -12,6 +12,7 @@
 namespace PhpJobQueue\Job;
 
 use PhpJobQueue\Worker\AbstractWorker;
+use PhpJobQueue\Exception\JobInvalidException;
 
 class CommandJob extends Job
 {
@@ -25,8 +26,16 @@ class CommandJob extends Job
         $this->parameters['command'] = $command;
     }
     
+    public function validate()
+    {
+        if (empty($this->parameters['command'])) {
+            throw new JobInvalidException('[CommandJob] The command parameter is missing. Use $job->setCommand()');
+        }
+    }
+    
     public function perform(AbstractWorker $worker)
     {
+        $this->validate();
         unset($this->lastLine, $this->output, $this->returnCode);
         $this->lastLine = exec($this->parameters['command'], $this->output, $this->returnCode);
         $worker->getLogger()->info(sprintf('Last line from %s = %s', $this, $this->lastLine));

@@ -40,8 +40,8 @@ class Configuration implements ConfigurationInterface
      */
     public function initialise($input = null)
     {
-        // Yaml component will process the input correctly whether it is a path, YAML string or array.
-        $this->options = Yaml::parse($input);
+        // Yaml component will process the input correctly whether it is a path or YAML string
+        $this->options = is_array($input) ? $input : Yaml::parse($input);
         
         if (!is_array($this->options)) {
             $this->options = array();

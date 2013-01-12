@@ -12,6 +12,7 @@
 namespace PhpJobQueue\Worker;
 
 use PhpJobQueue\PhpJobQueue;
+use PhpJobQueue\Storage\StorageInterface;
 use PhpJobQueue\Job\Job;
 
 /**
@@ -46,9 +47,9 @@ class Child extends AbstractWorker
      * @param PhpJobQueue $phpJobQueue The core PhpJobQueue object
      * @param int $processId The process ID assigned to this worker
      */
-    public function __construct(PhpJobQueue $phpJobQueue, $forked=false)
+    public function __construct(PhpJobQueue $phpJobQueue, StorageInterface $storage, $forked=false)
     {
-        parent::__construct($phpJobQueue, 'worker.child');
+        parent::__construct($phpJobQueue, $storage, 'worker.child');
         
         $this->interval = $this->phpJobQueue->getConfig('general')->workerInterval;
         
@@ -154,7 +155,7 @@ class Child extends AbstractWorker
     /**
      * Attempt to retrieve a job from one of the queues
      *
-     * @return PhpJobQueue\Job\Job Returns a job or false if there is nothing in the queue 
+     * @return PhpJobQueue\Job\Job Returns a job or null if there is nothing in the queue 
      */
     protected function retrieveJob()
     {
@@ -216,5 +217,10 @@ class Child extends AbstractWorker
 		pcntl_signal(SIGPIPE, array($this, 'reestablishRedisConnection'));
 		$this->log('Registered signals', self::LOG_VERBOSE);
 		*/
+	}
+	
+	public function getContext()
+	{
+	    return $this->context;
 	}
 }

@@ -11,7 +11,6 @@
 
 namespace PhpJobQueue\Tests;
 
-
 class TestCase extends \PHPUnit_Framework_TestCase
 {
     protected static $functionCalls;
@@ -19,6 +18,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
     
     public function setUp()
     {
+        if (!extension_loaded('runkit')) {
+            echo "These unit tests require the runkit extension.  For more information, please visit:\n";
+            echo "https://github.com/zenovich/runkit/\n";
+            exit(1);
+        }
+        
         // zero function counter
         self::$functionCalls = array();
         self::$replacedFunctions = array();
@@ -36,21 +41,20 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $logger->pushHandler($buffer);
     }
     
-    protected function replaceFunction($name, $args, $code)
+    protected function replaceFunction($name, $args = '', $code = '')
     {
-        do {
-            $backup = '_' . ($backup ? $backup : $name);
-        } while (function_exists($backup));
+        $backup = '_backup_'.$name;
         
-        $code = "TestCase::\$functionCalls[] = $name; $code";
+        $code = "\PhpJobQueue\Tests\TestCase::functionCalled(__FUNCTION__); $code";
         
         if (function_exists($name)) {
             $renamed = true;
-            runkit_function_rename($name, $backup);
+            \runkit_function_copy($name, $backup);
+            \runkit_function_redefine($name, $args, $code);
         } else {
             $renamed = false;
+            \runkit_function_add($name, $args, $code);
         }
-        runkit_function_define($name, $args, $code);
         
         self::$replacedFunctions[] = array($name, $renamed ? $backup : false);
     }
@@ -59,10 +63,32 @@ class TestCase extends \PHPUnit_Framework_TestCase
     {
         foreach (self::$replacedFunctions as $names) {
             list($original, $backup) = $names;
-            runkit_function_remove($original);
+            \runkit_function_remove($original);
             if ($backup) {
-                runkit_function_rename($backup, $original);
+                \runkit_function_copy($backup, $original);
+                \runkit_function_remove($backup);
             }
         }
+    }
+    
+    public static function functionCalled($name)
+    {
+        if (!isset(self::$functionCalls[$name])) {
+            self::$functionCalls[$name] = 0;
+        }
+        self::$functionCalls[$name]++;
+    }
+    
+    public static function getFunctionCalled($name)
+    {
+        return isset(self::$functionCalls[$name]) ? self::$functionCalls[$name] : 0;
+    }
+    
+    protected function getRedisStorageMock(Array $methods = array())
+    {
+        return $this->getMockBuilder('PhpJobQueue\\Storage\\Redis')
+            ->disableOriginalConstructor()
+            ->setMethods($methods)
+            ->getMock();
     }
 }

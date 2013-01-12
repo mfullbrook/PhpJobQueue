@@ -49,4 +49,20 @@ class PhpJobQueue extends \PhpJobQueue\PhpJobQueue
         
         return $filtered;
     }
+    
+    /**
+     * Make this publicy accesible
+     */
+    public function getStorage()
+    {
+        return parent::getStorage();
+    }
+    
+    /**
+     * Allow the storage to be injected
+     */
+    public function setStorage($storage)
+    {
+        $this->storage = $storage;
+    }
 }

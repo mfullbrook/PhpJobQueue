@@ -12,6 +12,7 @@
 namespace PhpJobQueue\Worker;
 
 use PhpJobQueue\PhpJobQueue;
+use PhpJobQueue\Storage\StorageInterface;
 
 /**
  * Manager Worker Class. Spawns Child Workers using pcntl
@@ -24,11 +25,11 @@ class Manager extends AbstractWorker
      * Class Constructor
      *
      * @param PhpJobQueue $phpJobQueue The core PhpJobQueue object
-     * @param int $children The number of child processes to spawn
+     * @param int $numWorkers The number of child processes to spawn
      */
-    public function __construct(PhpJobQueue $phpJobQueue, $numWorkers=1)
+    public function __construct(PhpJobQueue $phpJobQueue, StorageInterface $storage, $numWorkers)
     {
-        parent::__construct($phpJobQueue, 'worker.manager');
+        parent::__construct($phpJobQueue, $storage, 'worker.manager');
         $this->numWorkers = (int) $numWorkers;
         
         $this->logger->debug('Manager PID = '.posix_getpid());
@@ -51,28 +52,20 @@ class Manager extends AbstractWorker
         		    // running as forked process
         		    $this->logger->info('Forked worker process '.getmypid());
         		    fwrite(STDOUT, '*** Starting worker with PID '.getmypid()."\n");
-        		    
-        		    $child = $this->childFactory();
+        		    $child = $this->childFactory(true);
         		    $child->work();
         			break;
         		}
         	}
-        	
-        	pcntl_wait($pid);
         }
         else {
-            // create a PID file
-            //$pidPath = $
-            $PIDFILE = null; //getenv('PIDFILE');
-        	if ($PIDFILE) {
-        		file_put_contents($PIDFILE, getmypid()) or
-        			die('Could not write PID information to ' . $PIDFILE);
-        	}
-        	
         	$this->logger->info('Single process worker, starting child.');
-        	$child = $this->childFactory();
+        	$this->started();
+        	$this->status = AbstractWorker::STATUS_DESPATCHED;
+        	$child = $this->childFactory(false);
 		    $child->work();
         }
+        
         
     }
     
@@ -81,10 +74,10 @@ class Manager extends AbstractWorker
      *
      * @return PhpJobQueue\Worker\Child
      */
-    public function childFactory()
+    public function childFactory($forked)
     {
-        $child = new Child($this->phpJobQueue);
-        $child->setQueues($this->queuesFilter);
+        $child = new Child($this->phpJobQueue, $forked);
+        $child->setQueuesFilter($this->queuesFilter);
         return $child;
     }
 }

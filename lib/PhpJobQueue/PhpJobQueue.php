@@ -50,7 +50,8 @@ class PhpJobQueue implements \ArrayAccess
     
     protected $classes = array(
         'queue' => 'PhpJobQueue\\Queue\\Redis',
-        'storage' => 'PhpJobQueue\\Storage\\Redis'
+        'storage' => 'PhpJobQueue\\Storage\\Redis',
+        'worker' => 'PhpJobQueue\\Worker\\Manager'
     );
     
     /**
@@ -122,14 +123,35 @@ class PhpJobQueue implements \ArrayAccess
     }
     
     /**
-     * Retrieves the next job from the queue, iterates through the queues 
-     *
-     * @return PhpJobQueue\Job\JobInterface
+     * @param int $children The number of child processes to spawn
      */
-    public function retrieveNext()
+    public function work($numWorkers)
     {
-        // iterate and retrieve
+        $class = $this->getClass('worker');
+        $worker = new $class($pjq, $this->getStorage(), $numWorkers);
+        $worker->work();
     }
+    
+    /**
+     * Find a job by job ID
+     *
+     * @param string
+     * @return PhpJobQueue\Job\Job $job
+     */
+    public function findJob($id)
+    {
+        return $this->getStorage()->findJob($id);
+    }
+    
+    /**
+     * Gets all the trace information of the workers
+     *
+     * @return PhpJobQueue\Worker\TraceInfo[]
+     */
+     public function getWorkersTraceInfo()
+     {
+         return $this->getStorage()->getWorkersTraceInfo();
+     }
     
     /**
      * Factory method for fetching a Queue instance

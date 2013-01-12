@@ -170,5 +170,7 @@ abstract class Job
         return sprintf('{%s:%s}', basename(str_replace('\\', '/', get_class($this))), $this->id);
     }
     
+    abstract public function validate();
+    
     abstract public function perform(\PhpJobQueue\Worker\AbstractWorker $worker);
 }

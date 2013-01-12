@@ -10,7 +10,6 @@
  */
 
 require __DIR__.'/vendor/symfony/src/Symfony/Component/ClassLoader/UniversalClassLoader.php';
-require __DIR__.'/vendor/symfony/src/Symfony/Component/ClassLoader/DebugUniversalClassLoader.php';
 
 $classLoader = new Symfony\Component\ClassLoader\UniversalClassLoader();
 $classLoader->registerNamespaces(array(

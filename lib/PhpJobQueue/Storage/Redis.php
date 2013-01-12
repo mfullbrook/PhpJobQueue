@@ -17,6 +17,8 @@ use PhpJobQueue\Config\RedisConfig;
 use PhpJobQueue\Job\Job;
 use PhpJobQueue\Exception\JobCorruptException;
 use PhpJobQueue\Exception\JobNotFoundException;
+use PhpJobQueue\Worker\AbstractWorker;
+use PhpJobQueue\Worker\TraceInfo;
 
 /**
  * Extend Predis Client so that we can manipulate the config
@@ -47,7 +49,6 @@ class Redis extends Client implements StorageInterface
      public function getJob($id)
      {
          $hash = $this->hgetall(self::idToKey($id));
-         
          if ($hash === null) {
              throw new JobNotFoundException();
          }
@@ -90,8 +91,10 @@ class Redis extends Client implements StorageInterface
      */
     public function jobStarted(Job $job)
     {
-        $this->hset(self::idToKey($id), 'status', Job::STATUS_WORKING);
-        $this->hset(self::idToKey($id), 'startedAt', PhpJobQueue::getUtcDateString());
+        $job->setStatus(Job::STATUS_WORKING);
+        $job->setStartedAt(PhpJobQueue::getUtcDateString());
+        $this->hset(self::idToKey($job->getId()), 'status', $job->getStatus());
+        $this->hset(self::idToKey($job->getId()), 'startedAt', $job->getStartedAt());
     }
     
     /**
@@ -99,8 +102,10 @@ class Redis extends Client implements StorageInterface
      */
     public function jobCompleted(Job $job)
     {
-        $this->hset(self::idToKey($id), 'status', Job::STATUS_COMPLETE);
-        $this->hset(self::idToKey($id), 'completedAt', PhpJobQueue::getUtcDateString());
+        $job->setStatus(Job::STATUS_COMPLETE);
+        $job->setCompletedAt(PhpJobQueue::getUtcDateString());
+        $this->hset(self::idToKey($job->getId()), 'status', $job->getStatus());
+        $this->hset(self::idToKey($job->getId()), 'completedAt', $job->getCompletedAt());
     }
     
     /**
@@ -108,8 +113,61 @@ class Redis extends Client implements StorageInterface
      */
     public function jobFailed(Job $job, $error)
     {
-        $this->hset(self::idToKey($id), 'status', Job::STATUS_FAILED);
-        $this->hset(self::idToKey($id), 'errorDetails', (string) $error);
+        $job->setStatus(Job::STATUS_FAILED);
+        $job->setErrorDetails(PhpJobQueue::getUtcDateString() . "\n" . (string)$error);
+        $this->hset(self::idToKey($job->getId()), 'status', $job->getStatus());
+        $this->hset(self::idToKey($job->getId()), 'errorDetails', $job->getErrorDetails());
+    }
+    
+    /**
+     * Find a job by job ID
+     *
+     * @param string
+     * @return PhpJobQueue\Job\Job $job
+     */
+    public function findJob($id)
+    {
+        
+    }
+    
+    /**
+     * Updates the database with the status, pid and current job (if working),
+     * time started and worked count.
+     * 
+     * @param AbstractWorker $worker
+     */
+    public function traceWorkerStatus(AbstractWorker $worker)
+    {
+        $key = (string) $worker;
+        $this->sadd('workers', $key);
+        $this->hmset($key, $worker->getTraceInfo()->toArray());
+    }
+    
+    /**
+     * Remove from the database the tracking information for a worker
+     *
+     * @param AbstractWorker $worker
+     */
+    public function workerTerminated(AbstractWorker $worker)
+    {
+        $key = (string) $worker;
+        $this->srem('workers', $key);
+        $this->rem($key);
+    }
+    
+    /**
+     * Gets all the trace information of the workers
+     *
+     * @return PhpJobQueue\Worker\TraceInfo[]
+     */
+    public function getWorkersTraceInfo()
+    {
+        $workers = array();
+        foreach ($this->smembers('workers') as $key) {
+            if ($this->exists($key)) {
+                $workers[] = TraceInfo::fromArray($this->hgetall($key));
+            }
+        }
     }
     
 }

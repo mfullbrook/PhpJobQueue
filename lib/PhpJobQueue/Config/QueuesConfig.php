@@ -108,11 +108,15 @@ class QueuesConfig implements \IteratorAggregate
      */
     public function getFilteredIterator($filter = array())
     {
-        if (!is_array($filter) || !count($filter)) {
+        if (!is_array($filter)) {
             throw new \InvalidArgumentException('getFilteredIterator expects an array of queue names');
         } 
         
-        return new QueuesIterator(array_values(array_intersect($this->queues, $filter)));
+        if (count($filter)) {
+            return new QueuesIterator(array_values(array_intersect($this->queues, $filter)));
+        } else {
+            return new QueuesIterator($this->queues);
+        }
     }
     
     /**

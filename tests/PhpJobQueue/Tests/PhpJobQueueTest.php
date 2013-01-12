@@ -114,5 +114,53 @@ class PhpJobQueueTest extends TestCase
         unset($pjq['a']);
     }
     
+    /**
+     * @covers PhpJobQueue\PhpJobQueue::attachLogHandlers
+     */
+    public function testAttachLogHandlers()
+    {
+        $logger = new \Monolog\Logger('test');
+        $pjq = new \PhpJobQueue\PhpJobQueue(array('general' => array('log' => array('enabled' => false))));
+        $pjq->attachLogHandlers($logger);
+        $this->assertInstanceOf('Monolog\\Handler\\NullHandler', $logger->popHandler());
+    }
     
+    /**
+     * @covers PhpJobQueue\PhpJobQueue::getLogger
+     */
+    public function testGetLogger()
+    {
+        $pjq = new PhpJobQueue();
+        $this->assertInstanceOf('Monolog\\Logger', $pjq->getLogger());
+    }
+    
+    /**
+     * @covers PhpJobQueue\PhpJobQueue::getClass
+     */
+    public function testGetClass()
+    {
+        $pjq = new PhpJobQueue();
+        $this->assertEquals('PhpJobQueue\\Queue\\Redis', $pjq->getClass('queue'));
+    }
+    
+    /**
+     * @covers PhpJobQueue\PhpJobQueue::getStorage
+     */
+    public function testGetStorage()
+    {
+        $pjq = new PhpJobQueue();
+        $this->assertInstanceOf($pjq->getClass('storage'), $pjq->getStorage());
+    }
+    
+    /**
+     * @covers PhpJobQueue\PhpJobQueue::findJob
+     */
+    public function testFindJob()
+    {
+        $storage = $this->getRedisStorageMock();
+        $pjq = new PhpJobQueue();
+        $pjq->setStorage($storage);
+        
+        
+    }
 }

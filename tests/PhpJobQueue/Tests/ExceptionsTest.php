@@ -18,8 +18,9 @@ class ExceptionsTest extends TestCase
      */
     public function testConstruction()
     {
-        $e = new \PhpJobQueue\Exception\JobNotFoundException();
         $e = new \PhpJobQueue\Exception\JobCorruptException();
+        $e = new \PhpJobQueue\Exception\JobInvalidException();
+        $e = new \PhpJobQueue\Exception\JobNotFoundException();
         $e = new \PhpJobQueue\Exception\QueueNotFoundException();
         $this->assertTrue(true); // silence the no test warning
     }

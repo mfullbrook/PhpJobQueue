@@ -61,6 +61,8 @@ class Redis implements QueueInterface
      */
     public function enqueue(Job $job)
     {
+        $job->validate();
+        
         $id = $this->createJobId();
         $job->setId($id);
         
