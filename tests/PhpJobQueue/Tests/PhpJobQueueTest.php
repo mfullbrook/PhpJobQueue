@@ -68,8 +68,8 @@ class PhpJobQueueTest extends TestCase
     
     public function testGetUtcDateString()
     {
-        date_default_timezone_set('UTC');
-        $this->assertEquals(date('r'), PhpJobQueue::getUtcDateString());
+        $d = new \DateTime('now', new \DateTimeZone('UTC'));
+        $this->assertEquals($d->format(\DateTime::ISO8601), PhpJobQueue::getUtcDateString());
     }
     
     /**

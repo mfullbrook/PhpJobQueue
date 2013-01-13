@@ -116,7 +116,7 @@ abstract class AbstractWorker
 	/**
 	 * Record the start time and notify the storage
 	 */
-	protected function started()
+	public function started()
 	{
 	    $this->started = PhpJobQueue::getUtcDateString();
 	    $this->storage->traceWorkerStatus($this);
@@ -125,7 +125,7 @@ abstract class AbstractWorker
 	/**
 	 * Update the status and notify the storage
 	 */
-	protected function status($newStatus)
+	public function status($newStatus)
 	{
 	    $this->status = $newStatus;
 	    $this->storage->traceWorkerStatus($this);
@@ -134,12 +134,27 @@ abstract class AbstractWorker
 	/**
 	 * Increment the worked count and notify the storage
 	 */
-	protected function worked()
+	public function worked()
 	{
 	    $this->worked++;
 	    $this->storage->traceWorkerStatus($this);
 	}
-	
+
+    public function getStarted()
+    {
+        return $this->started;
+    }
+
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    public function getWorked()
+    {
+        return $this->worked;
+    }
+
 	/**
 	 * Creates and returns a trace info object with the values injected
 	 *

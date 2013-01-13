@@ -37,6 +37,7 @@ class RedisTest extends TestCase
         
         $storage = $this->getMock('PhpJobQueue\\Storage\\Redis', array('hmset', 'rpush'), array(new RedisConfig()));
 
+        $d = new \DateTime('now', new \DateTimeZone('UTC'));
         $storage
             ->expects($this->once())
             ->method('hmset')
@@ -46,7 +47,7 @@ class RedisTest extends TestCase
                         'params' => json_encode($jobParams),
                         'status' => Job::STATUS_WAITING,
                         'queue' => Redis::QUEUE_PREFIX . 'testQueue',
-                        'queuedAt' => date('r')
+                        'queuedAt' => $d->format(\DateTime::ISO8601)
                    )))
             ->id('hmset');
         

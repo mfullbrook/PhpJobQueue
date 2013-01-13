@@ -245,6 +245,6 @@ class PhpJobQueue implements \ArrayAccess
     public static function getUtcDateString()
     {
         $d = new DateTime('now', new DateTimeZone('UTC'));
-        return $d->format('r');
+        return $d->format(DateTime::ISO8601);
     }
 }

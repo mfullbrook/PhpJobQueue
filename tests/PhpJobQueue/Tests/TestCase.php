@@ -83,7 +83,18 @@ class TestCase extends \PHPUnit_Framework_TestCase
     {
         return isset(self::$functionCalls[$name]) ? self::$functionCalls[$name] : 0;
     }
-    
+
+    protected function getStorageMock()
+    {
+        return $this->getMockBuilder('PhpJobQueue\\Storage\\StorageInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    /**
+     * @param array $methods
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     protected function getRedisStorageMock(Array $methods = array())
     {
         return $this->getMockBuilder('PhpJobQueue\\Storage\\Redis')
