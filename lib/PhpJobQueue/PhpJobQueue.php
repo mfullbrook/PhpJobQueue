@@ -27,7 +27,7 @@ class PhpJobQueue implements \ArrayAccess
     const DEFAULT_QUEUE = 'default';
     
     /**
-     * @var PhpJobQueue\Config\ConfigurationInterface
+     * @var \PhpJobQueue\Config\ConfigurationInterface
      */
     protected $config;
     
@@ -37,7 +37,7 @@ class PhpJobQueue implements \ArrayAccess
     protected $queues = array();
     
     /**
-     * @var PhpJobQueue\Storage\Redis
+     * @var \PhpJobQueue\Storage\Redis
      */
     protected $storage;
     
@@ -49,9 +49,9 @@ class PhpJobQueue implements \ArrayAccess
     protected $logger;
     
     protected $classes = array(
-        'queue' => 'PhpJobQueue\\Queue\\Redis',
+        'queue'   => 'PhpJobQueue\\Queue\\Redis',
         'storage' => 'PhpJobQueue\\Storage\\Redis',
-        'worker' => 'PhpJobQueue\\Worker\\Manager'
+        'worker'  => 'PhpJobQueue\\Worker\\Manager'
     );
     
     /**
@@ -71,7 +71,7 @@ class PhpJobQueue implements \ArrayAccess
     }
     
     /**
-     * @return PhpJobQueue\Config\Configuration
+     * @return \PhpJobQueue\Config\Configuration
      */
     public function getConfig($key = null)
     {
@@ -79,7 +79,7 @@ class PhpJobQueue implements \ArrayAccess
     }
     
     /**
-     * @return Monolog\Logger
+     * @return \Monolog\Logger
      */
     public function getLogger()
     {
@@ -127,8 +127,9 @@ class PhpJobQueue implements \ArrayAccess
      */
     public function work($numWorkers)
     {
+        /** @var $worker \PhpJobQueue\Worker\AbstractWorker */
         $class = $this->getClass('worker');
-        $worker = new $class($pjq, $this->getStorage(), $numWorkers);
+        $worker = new $class($this, $this->getStorage(), $numWorkers);
         $worker->work();
     }
     
@@ -136,7 +137,7 @@ class PhpJobQueue implements \ArrayAccess
      * Find a job by job ID
      *
      * @param string
-     * @return PhpJobQueue\Job\Job $job
+     * @return \PhpJobQueue\Job\Job $job
      */
     public function findJob($id)
     {
@@ -146,7 +147,7 @@ class PhpJobQueue implements \ArrayAccess
     /**
      * Gets all the trace information of the workers
      *
-     * @return PhpJobQueue\Worker\TraceInfo[]
+     * @return \PhpJobQueue\Worker\TraceInfo[]
      */
      public function getWorkersTraceInfo()
      {
@@ -156,7 +157,7 @@ class PhpJobQueue implements \ArrayAccess
     /**
      * Factory method for fetching a Queue instance
      *
-     * @throws PhpJobQueue\Exception\QueueNotFoundException
+     * @throws \PhpJobQueue\Exception\QueueNotFoundException
      */
     protected function getQueue($name)
     {
@@ -224,7 +225,7 @@ class PhpJobQueue implements \ArrayAccess
     /**
      * Convenience method to GeneralConfig::attachLogHandlers
      *
-     * @param Monolog\Logger $logger
+     * @param \Monolog\Logger $logger
      */ 
     public function attachLogHandlers(Logger $logger)
     {

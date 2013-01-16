@@ -30,7 +30,7 @@ abstract class AbstractWorker
     protected $phpJobQueue;
     
     /**
-     * @var PhpJobQueue\Storage\StorageInterface
+     * @var \PhpJobQueue\Storage\StorageInterface
      */
     protected $storage;
     
@@ -106,7 +106,7 @@ abstract class AbstractWorker
 	/**
 	 * Return the logger instance
 	 *
-	 * @return Monolog\Logger
+	 * @return \Monolog\Logger
 	 */
 	public function getLogger()
 	{
@@ -158,7 +158,7 @@ abstract class AbstractWorker
 	/**
 	 * Creates and returns a trace info object with the values injected
 	 *
-	 * @return PhpJobQueue\Worker\TraceInfo
+	 * @return \PhpJobQueue\Worker\TraceInfo
 	 */
 	public function getTraceInfo()
 	{

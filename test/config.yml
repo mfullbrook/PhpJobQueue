@@ -1,7 +1,7 @@
 
 redis:
     parameters:
-        - tcp://127.0.0.1:6379
+        - tcp://127.0.0.1:6379?database=2
     
 queues:
     - { name: default, priority: 0 }

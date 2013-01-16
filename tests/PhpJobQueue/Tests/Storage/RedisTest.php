@@ -15,6 +15,9 @@ use PhpJobQueue\Tests\TestCase;
 use PhpJobQueue\Storage\Redis;
 use PhpJobQueue\Tests\Mock\TestJob;
 
+/**
+ * @Todo: Don't use a mock for Redis, mock the RedisConfig instead?
+ */
 class RedisTest extends TestCase
 {
     public function testIdToKey()
@@ -23,21 +26,21 @@ class RedisTest extends TestCase
     }
     
     /**
-     * @expectedException PhpJobQueue\Exception\JobNotFoundException
+     * @expectedException \PhpJobQueue\Exception\JobNotFoundException
      * @covers PhpJobQueue\Storage\Redis::getJob
      */
     public function testGetJobNotFound()
     {
-        $mock = $this->getRedisStorageMock(array('hgetall'));
-        $mock->expects($this->once())
+        $redis = $this->getRedisStorageMock(array('hgetall'));
+        $redis->expects($this->once())
              ->method('hgetall')
              ->will($this->returnValue(null));
         
-        $mock->getJob('id');
+        $redis->getJob('id');
     }
     
     /**
-     * @expectedException PhpJobQueue\Exception\JobCorruptException
+     * @expectedException \PhpJobQueue\Exception\JobCorruptException
      * @expectedExceptionCode 2
      * @covers PhpJobQueue\Storage\Redis::getJob
      */
@@ -45,16 +48,16 @@ class RedisTest extends TestCase
     {
         $hash = array();
         
-        $mock = $this->getRedisStorageMock(array('hgetall'));
-        $mock->expects($this->once())
+        $redis = $this->getRedisStorageMock(array('hgetall'));
+        $redis->expects($this->once())
              ->method('hgetall')
              ->will($this->returnValue($hash));
         
-        $mock->getJob('id');
+        $redis->getJob('id');
     }
     
     /**
-     * @expectedException PhpJobQueue\Exception\JobCorruptException
+     * @expectedException \PhpJobQueue\Exception\JobCorruptException
      * @expectedExceptionCode 1
      * @covers PhpJobQueue\Storage\Redis::getJob
      */
@@ -62,16 +65,16 @@ class RedisTest extends TestCase
     {
         $hash = array('params' => 'NULL');
         
-        $mock = $this->getRedisStorageMock(array('hgetall'));
-        $mock->expects($this->once())
+        $redis = $this->getRedisStorageMock(array('hgetall'));
+        $redis->expects($this->once())
              ->method('hgetall')
              ->will($this->returnValue($hash));
         
-        $mock->getJob('id');
+        $redis->getJob('id');
     }
     
     /**
-     * @expectedException PhpJobQueue\Exception\JobCorruptException
+     * @expectedException \PhpJobQueue\Exception\JobCorruptException
      * @expectedExceptionCode 3
      * @covers PhpJobQueue\Storage\Redis::getJob
      */
@@ -79,12 +82,12 @@ class RedisTest extends TestCase
     {
         $hash = array('class' => 'PhpJobQueue\\Job\\Job', 'params' => '[foo');
         
-        $mock = $this->getRedisStorageMock(array('hgetall'));
-        $mock->expects($this->once())
+        $redis = $this->getRedisStorageMock(array('hgetall'));
+        $redis->expects($this->once())
              ->method('hgetall')
              ->will($this->returnValue($hash));
         
-        $mock->getJob('id');
+        $redis->getJob('id');
     }
     
     /**
@@ -114,12 +117,12 @@ class RedisTest extends TestCase
         $job->setCompletedAt(date('r'));
         $job->setErrorDetails('errorDetails is currently just a string');
         
-        $mock = $this->getRedisStorageMock(array('hgetall'));
-        $mock->expects($this->once())
+        $redis = $this->getRedisStorageMock(array('hgetall'));
+        $redis->expects($this->once())
              ->method('hgetall')
              ->will($this->returnValue($hash));
         
-        $returnedJob = $mock->getJob('id');
+        $returnedJob = $redis->getJob('id');
         
         $this->assertEquals($job, $returnedJob);
     }
@@ -129,31 +132,45 @@ class RedisTest extends TestCase
      */
     public function testJobStarted()
     {
-        $mock = $this->getRedisStorageMock(array('hset'));
-        $mock->expects($this->exactly(2))
+        $redis = $this->getRedisStorageMock(array('hset'));
+        $redis->expects($this->exactly(2))
             ->method('hset');
         
         $job = new TestJob();
-        $mock->jobStarted($job);
+        $redis->jobStarted($job);
     }
     
     public function testJobCompleted()
     {
-        $mock = $this->getRedisStorageMock(array('hset'));
-        $mock->expects($this->exactly(2))
+        $redis = $this->getRedisStorageMock(array('hset'));
+        $redis->expects($this->exactly(2))
             ->method('hset');
         
         $job = new TestJob();
-        $mock->jobCompleted($job);
+        $redis->jobCompleted($job);
     }
     
     public function testJobFailed()
     {
-        $mock = $this->getRedisStorageMock(array('hset'));
-        $mock->expects($this->exactly(2))
+        $redis = $this->getRedisStorageMock(array('hset'));
+        $redis->expects($this->exactly(2))
             ->method('hset');
         
         $job = new TestJob();
-        $mock->jobFailed($job, 'test error');
+        $redis->jobFailed($job, 'test error');
+    }
+
+    public function testTraceWorkerStatus()
+    {
+        $worker = $this->getMockBuilder('PhpJobQueue\\Worker\\AbstractWorker')
+            ->disableOriginalConstructor()
+            ->getMock();
+        
+        $worker->expects($this->once())
+            ->method('__toString')
+            ->will($this->returnValue('foobar'));
+        
+        $redis = $this->getRedisStorageMock(array('sadd', 'hmset'));
+        $redis->traceWorkerStatus($worker);
     }
 }

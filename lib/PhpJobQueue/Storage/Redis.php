@@ -22,6 +22,8 @@ use PhpJobQueue\Worker\TraceInfo;
 
 /**
  * Extend Predis Client so that we can manipulate the config
+ *
+ * @Todo: Don't extend Redis, inject it.
  */
 class Redis extends Client implements StorageInterface
 {
@@ -67,6 +69,7 @@ class Redis extends Client implements StorageInterface
              throw new JobCorruptException('The params field did not decode successfully', JobCorruptException::JSON_DECODE_FAILED);
          }
 
+         /* @var $job Job */
          $job = new $hash['class']();
          $job->setId($id);
          $job->setParameters($params);
@@ -123,11 +126,11 @@ class Redis extends Client implements StorageInterface
      * Find a job by job ID
      *
      * @param string
-     * @return PhpJobQueue\Job\Job $job
+     * @return \PhpJobQueue\Job\Job $job
      */
     public function findJob($id)
     {
-        
+        // Todo: implement this method...
     }
     
     /**
@@ -158,7 +161,7 @@ class Redis extends Client implements StorageInterface
     /**
      * Gets all the trace information of the workers
      *
-     * @return PhpJobQueue\Worker\TraceInfo[]
+     * @return \PhpJobQueue\Worker\TraceInfo[]
      */
     public function getWorkersTraceInfo()
     {
