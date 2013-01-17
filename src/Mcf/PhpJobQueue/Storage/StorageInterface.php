@@ -11,8 +11,9 @@
 
 namespace Mcf\PhpJobQueue\Storage;
 
-use Mcf\PhpJobQueue\Job\Job;
+use Mcf\PhpJobQueue\Job\JobInterface;
 use Mcf\PhpJobQueue\Worker\AbstractWorker;
+use Mcf\PhpJobQueue\Worker\TraceInfo;
 
 /**
  * Interface that defines the methods a storage class must expose
@@ -30,10 +31,10 @@ interface StorageInterface
     /**
      * Get a job object from an ID
      *
-     * @throws PhpJobQueue\Exception\JobNotFoundException
-     * @throws PhpJobQueue\Exception\JobCorruptException
+     * @throws \Mcf\PhpJobQueue\Exception\JobNotFoundException
+     * @throws \Mcf\PhpJobQueue\Exception\JobCorruptException
      *
-     * @return PhpJobQueue\Job
+     * @return Job
      */
     public function getJob($id);
     
@@ -41,31 +42,31 @@ interface StorageInterface
      * Notifies the database that a job has been started.
      * The database should record the time this occurred.
      * 
-     * @param PhpJobQueue\Job\Job $job
+     * @param Job $job
      */
-    public function jobStarted(Job $job);
+    public function jobStarted(JobInterface $job);
     
     /**
      * Notifies the database that a job completed successfully.
      * The database should record the time this occurred.
      * 
-     * @param PhpJobQueue\Job\Job $job
+     * @param Job $job
      */
-    public function jobCompleted(Job $job);
+    public function jobCompleted(JobInterface $job);
     
     /**
      * Notifies the database that a job failed with an exception or error message
      * 
-     * @param PhpJobQueue\Job\Job $job
+     * @param Job $job
      * @param mixed $error Error message or typically an exception
      */
-    public function jobFailed(Job $job, $error);
+    public function jobFailed(JobInterface $job, $error);
     
     /**
      * Find a job by job ID
      *
      * @param string
-     * @return PhpJobQueue\Job\Job $job
+     * @return Job $job
      */
     public function findJob($id);
     
@@ -89,7 +90,7 @@ interface StorageInterface
     /**
      * Gets all the trace information of the workers
      *
-     * @return PhpJobQueue\Worker\TraceInfo[]
+     * @return TraceInfo[]
      */
     public function getWorkersTraceInfo();
 }

@@ -11,7 +11,7 @@
 
 namespace Mcf\PhpJobQueue\Queue;
 
-use Mcf\PhpJobQueue\Job\Job;
+use Mcf\PhpJobQueue\Job\JobInterface;
 
 /**
  * Interface that describes an individual job queue.
@@ -20,13 +20,13 @@ interface QueueInterface
 {
     /**
      * Add a Job to the queue
-     * @param PhpJobQueue\Job\Job
+     * @param JobInterface
      * @return string The ID of the enqueued job
      */
-    public function enqueue(Job $job);
+    public function enqueue(JobInterface $job);
     
     /**
-     * @return PhpJobQueue\Job\Job Returns a job or null if there is nothing in the queue 
+     * @return JobInterface Returns a job or null if there is nothing in the queue
      */
     public function retrieve();
     

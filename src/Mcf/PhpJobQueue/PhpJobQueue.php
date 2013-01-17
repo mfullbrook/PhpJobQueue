@@ -14,7 +14,7 @@ namespace Mcf\PhpJobQueue;
 use Mcf\PhpJobQueue\Config\ConfigurationInterface;
 use Mcf\PhpJobQueue\Config\Configuration;
 use Mcf\PhpJobQueue\Exception\QueueNotFoundException;
-use Mcf\PhpJobQueue\Job\Job;
+use Mcf\PhpJobQueue\Job\JobInterface;
 use Monolog\Logger;
 use DateTime, DateTimeZone;
 
@@ -27,7 +27,7 @@ class PhpJobQueue implements \ArrayAccess
     const DEFAULT_QUEUE = 'default';
     
     /**
-     * @var \PhpJobQueue\Config\ConfigurationInterface
+     * @var \Mcf\PhpJobQueue\Config\ConfigurationInterface
      */
     protected $config;
     
@@ -37,14 +37,14 @@ class PhpJobQueue implements \ArrayAccess
     protected $queues = array();
     
     /**
-     * @var \PhpJobQueue\Storage\Redis
+     * @var \Mcf\PhpJobQueue\Storage\Redis
      */
     protected $storage;
     
     /**
      * The logger for the PhpJobQueue class
      *
-     * @var Monolog\Logger
+     * @var \Monolog\Logger
      */
     protected $logger;
     
@@ -71,7 +71,7 @@ class PhpJobQueue implements \ArrayAccess
     }
     
     /**
-     * @return \PhpJobQueue\Config\Configuration
+     * @return \Mcf\PhpJobQueue\Config\Configuration
      */
     public function getConfig($key = null)
     {
@@ -109,7 +109,7 @@ class PhpJobQueue implements \ArrayAccess
      * @param Job $job The job to add to the end of the queue
      * @param string $queueName The name of the queue, if not supplied uses default queue
      */
-    public function enqueue(Job $job, $queueName = null)
+    public function enqueue(JobInterface $job, $queueName = null)
     {
         if (is_null($queueName)) {
             $queueName = static::DEFAULT_QUEUE;
@@ -127,7 +127,7 @@ class PhpJobQueue implements \ArrayAccess
      */
     public function work($numWorkers)
     {
-        /** @var $worker \PhpJobQueue\Worker\AbstractWorker */
+        /** @var $worker \Mcf\PhpJobQueue\Worker\AbstractWorker */
         $class = $this->getClass('worker');
         $worker = new $class($this, $this->getStorage(), $numWorkers);
         $worker->work();
@@ -137,7 +137,7 @@ class PhpJobQueue implements \ArrayAccess
      * Find a job by job ID
      *
      * @param string
-     * @return \PhpJobQueue\Job\Job $job
+     * @return \Mcf\PhpJobQueue\Job\JobInterface $job
      */
     public function findJob($id)
     {
@@ -147,7 +147,7 @@ class PhpJobQueue implements \ArrayAccess
     /**
      * Gets all the trace information of the workers
      *
-     * @return \PhpJobQueue\Worker\TraceInfo[]
+     * @return \Mcf\PhpJobQueue\Worker\TraceInfo[]
      */
      public function getWorkersTraceInfo()
      {
@@ -157,7 +157,7 @@ class PhpJobQueue implements \ArrayAccess
     /**
      * Factory method for fetching a Queue instance
      *
-     * @throws \PhpJobQueue\Exception\QueueNotFoundException
+     * @throws \Mcf\PhpJobQueue\Exception\QueueNotFoundException
      */
     protected function getQueue($name)
     {

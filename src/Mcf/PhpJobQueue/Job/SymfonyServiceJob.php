@@ -19,7 +19,7 @@ use Mcf\PhpJobQueue\Exception\JobInvalidException as Invalid;
  *
  * The class is responsible for launching symfony
  */
-class SymfonyServiceJob extends Job
+class SymfonyServiceJob extends AbstractJob
 {
     // set some defaults
     protected $parameters = array(

@@ -11,7 +11,7 @@
 
 namespace Mcf\PhpJobQueue\Queue;
 
-use Mcf\PhpJobQueue\Job\Job;
+use Mcf\PhpJobQueue\Job\JobInterface;
 use Mcf\PhpJobQueue\PhpJobQueue;
 use Mcf\PhpJobQueue\Storage\Redis as RedisStorage;
 use Mcf\PhpJobQueue\Exception\JobNotFoundException;
@@ -59,7 +59,7 @@ class Redis implements QueueInterface
     /**
      * {@inheritDoc}
      */
-    public function enqueue(Job $job)
+    public function enqueue(JobInterface $job)
     {
         $job->validate();
         
@@ -70,7 +70,7 @@ class Redis implements QueueInterface
         $this->storage->hmset(RedisStorage::idToKey($id), array(
             'class' => get_class($job),
             'params' => json_encode($job->getParameters()),
-            'status' => Job::STATUS_WAITING,
+            'status' => JobInterface::STATUS_WAITING,
             'queue' => $this->name,
             'queuedAt' => PhpJobQueue::getUtcDateString(),
         ));

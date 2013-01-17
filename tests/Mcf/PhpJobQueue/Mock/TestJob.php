@@ -11,9 +11,9 @@
 
 namespace Mcf\PhpJobQueue\Mock;
 
-use Mcf\PhpJobQueue\Job\Job;
+use Mcf\PhpJobQueue\Job\AbstractJob;
 
-class TestJob extends Job
+class TestJob extends AbstractJob
 {
     public function perform(\Mcf\PhpJobQueue\Worker\AbstractWorker $worker)
     {

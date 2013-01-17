@@ -14,7 +14,7 @@ namespace Mcf\PhpJobQueue\Job;
 use Mcf\PhpJobQueue\Worker\AbstractWorker;
 use Mcf\PhpJobQueue\Exception\JobInvalidException;
 
-class CommandJob extends Job
+class CommandJob extends AbstractJob
 {
     protected $command;
     protected $output;

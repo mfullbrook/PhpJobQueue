@@ -100,7 +100,7 @@ class RedisTest extends TestCase
             'class' => 'Mcf\\PhpJobQueue\\Mock\\TestJob',
             'params' => '{"foo":"bar"}',
             'id' => 'id',
-            'status' => \Mcf\PhpJobQueue\Job\Job::STATUS_FAILED,
+            'status' => \Mcf\PhpJobQueue\Job\JobInterface::STATUS_FAILED,
             'queue' => 'testQueue',
             'queuedAt' => date('r', time() - 300),
             'startedAt' => date('r', time() - 10),
@@ -111,7 +111,7 @@ class RedisTest extends TestCase
         $job = new \Mcf\PhpJobQueue\Mock\TestJob();
         $job->setId('id');
         $job->setParameters(array('foo' => 'bar'));
-        $job->setStatus(\Mcf\PhpJobQueue\Job\Job::STATUS_FAILED);
+        $job->setStatus(\Mcf\PhpJobQueue\Job\JobInterface::STATUS_FAILED);
         $job->setQueueName('testQueue');
         $job->setQueuedAt(date('r', time() - 300));
         $job->setStartedAt(date('r', time() - 10));

@@ -14,7 +14,7 @@ namespace Mcf\PhpJobQueue\Queue;
 use Mcf\PhpJobQueue\Queue\Redis;
 use Mcf\PhpJobQueue\Storage\Redis as RedisStorage;
 use Mcf\PhpJobQueue\Config\RedisConfig;
-use Mcf\PhpJobQueue\Job\Job;
+use Mcf\PhpJobQueue\Job\JobInterface;
 use Mcf\PhpJobQueue\Mock\TestJob;
 use Mcf\PhpJobQueue\TestCase;
 use Mcf\PhpJobQueue\Mock\PhpJobQueue;
@@ -45,7 +45,7 @@ class RedisTest extends TestCase
                    $this->equalTo(array(
                         'class' => 'Mcf\\PhpJobQueue\\Mock\\TestJob',
                         'params' => json_encode($jobParams),
-                        'status' => Job::STATUS_WAITING,
+                        'status' => JobInterface::STATUS_WAITING,
                         'queue' => Redis::QUEUE_PREFIX . 'testQueue',
                         'queuedAt' => $d->format(\DateTime::ISO8601)
                    )))

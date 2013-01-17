@@ -13,13 +13,8 @@ namespace Mcf\PhpJobQueue\Job;
 
 use Mcf\PhpJobQueue\Worker\AbstractWorker;
 
-abstract class Job
+abstract class AbstractJob implements JobInterface
 {
-    const STATUS_WAITING = 'WAITING';
-    const STATUS_WORKING = 'WORKING';
-    const STATUS_COMPLETE = 'COMPLETE';
-    const STATUS_FAILED = 'FAILED';
-    
     protected $id;
     
     protected $parameters = array();
@@ -165,14 +160,20 @@ abstract class Job
         $this->errorDetails = $errorDetails;
     }
 
-    
+    public function jsonSerialize()
+    {
+        return array(
+            'class'    => get_class($this),
+            'params'   => $this->parameters,
+            'status'   => $this->status,
+            'queue'    => $this->queueName,
+            'queuedAt' => $this->queuedAt
+        );
+    }
     
     public function __toString()
     {
         return sprintf('{%s:%s}', basename(str_replace('\\', '/', get_class($this))), $this->id);
     }
     
-    abstract public function validate();
-    
-    abstract public function perform(AbstractWorker $worker);
 }

@@ -14,7 +14,7 @@ namespace Mcf\PhpJobQueue\Storage;
 use Predis\Client;
 use Mcf\PhpJobQueue\PhpJobQueue;
 use Mcf\PhpJobQueue\Config\RedisConfig;
-use Mcf\PhpJobQueue\Job\Job;
+use Mcf\PhpJobQueue\Job\JobInterface;
 use Mcf\PhpJobQueue\Exception\JobCorruptException;
 use Mcf\PhpJobQueue\Exception\JobNotFoundException;
 use Mcf\PhpJobQueue\Worker\AbstractWorker;
@@ -92,9 +92,9 @@ class Redis extends Client implements StorageInterface
     /**
      * {@inheritDoc}
      */
-    public function jobStarted(Job $job)
+    public function jobStarted(JobInterface $job)
     {
-        $job->setStatus(Job::STATUS_WORKING);
+        $job->setStatus(JobInterface::STATUS_WORKING);
         $job->setStartedAt(PhpJobQueue::getUtcDateString());
         $this->hset(self::idToKey($job->getId()), 'status', $job->getStatus());
         $this->hset(self::idToKey($job->getId()), 'startedAt', $job->getStartedAt());
@@ -103,9 +103,9 @@ class Redis extends Client implements StorageInterface
     /**
      * {@inheritDoc}
      */
-    public function jobCompleted(Job $job)
+    public function jobCompleted(JobInterface $job)
     {
-        $job->setStatus(Job::STATUS_COMPLETE);
+        $job->setStatus(JobInterface::STATUS_COMPLETE);
         $job->setCompletedAt(PhpJobQueue::getUtcDateString());
         $this->hset(self::idToKey($job->getId()), 'status', $job->getStatus());
         $this->hset(self::idToKey($job->getId()), 'completedAt', $job->getCompletedAt());
@@ -114,9 +114,9 @@ class Redis extends Client implements StorageInterface
     /**
      * {@inheritDoc}
      */
-    public function jobFailed(Job $job, $error)
+    public function jobFailed(JobInterface $job, $error)
     {
-        $job->setStatus(Job::STATUS_FAILED);
+        $job->setStatus(JobInterface::STATUS_FAILED);
         $job->setErrorDetails(PhpJobQueue::getUtcDateString() . "\n" . (string)$error);
         $this->hset(self::idToKey($job->getId()), 'status', $job->getStatus());
         $this->hset(self::idToKey($job->getId()), 'errorDetails', $job->getErrorDetails());
@@ -126,7 +126,7 @@ class Redis extends Client implements StorageInterface
      * Find a job by job ID
      *
      * @param string
-     * @return \PhpJobQueue\Job\Job $job
+     * @return \Mcf\PhpJobQueue\Job\JobInterface $job
      */
     public function findJob($id)
     {
@@ -161,7 +161,7 @@ class Redis extends Client implements StorageInterface
     /**
      * Gets all the trace information of the workers
      *
-     * @return \PhpJobQueue\Worker\TraceInfo[]
+     * @return \Mcf\PhpJobQueue\Worker\TraceInfo[]
      */
     public function getWorkersTraceInfo()
     {

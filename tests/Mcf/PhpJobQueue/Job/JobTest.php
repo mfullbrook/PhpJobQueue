@@ -16,26 +16,26 @@ use Mcf\PhpJobQueue\TestCase;
 class JobTest extends TestCase
 {
     /**
-     * @covers \Mcf\PhpJobQueue\Job\Job::setId
-     * @covers \Mcf\PhpJobQueue\Job\Job::getId
-     * @covers \Mcf\PhpJobQueue\Job\Job::setParameters
-     * @covers \Mcf\PhpJobQueue\Job\Job::getParameters
-     * @covers \Mcf\PhpJobQueue\Job\Job::setStatus
-     * @covers \Mcf\PhpJobQueue\Job\Job::getStatus
-     * @covers \Mcf\PhpJobQueue\Job\Job::setQueueName
-     * @covers \Mcf\PhpJobQueue\Job\Job::getQueueName
-     * @covers \Mcf\PhpJobQueue\Job\Job::setQueuedAt
-     * @covers \Mcf\PhpJobQueue\Job\Job::getQueuedAt
-     * @covers \Mcf\PhpJobQueue\Job\Job::setStartedAt
-     * @covers \Mcf\PhpJobQueue\Job\Job::getStartedAt
-     * @covers \Mcf\PhpJobQueue\Job\Job::setCompletedAt
-     * @covers \Mcf\PhpJobQueue\Job\Job::getCompletedAt
-     * @covers \Mcf\PhpJobQueue\Job\Job::setErrorDetails
-     * @covers \Mcf\PhpJobQueue\Job\Job::getErrorDetails
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::setId
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::getId
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::setParameters
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::getParameters
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::setStatus
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::getStatus
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::setQueueName
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::getQueueName
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::setQueuedAt
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::getQueuedAt
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::setStartedAt
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::getStartedAt
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::setCompletedAt
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::getCompletedAt
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::setErrorDetails
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::getErrorDetails
      */
     public function testSetterAndGetters()
     {
-        $job = $this->getMockForAbstractClass('Mcf\\PhpJobQueue\\Job\\Job');
+        $job = $this->getMockForAbstractClass('Mcf\\PhpJobQueue\\Job\\AbstractJob');
         
         $job->setId('123');
         $this->assertEquals('123', $job->getId());
@@ -65,12 +65,12 @@ class JobTest extends TestCase
     }
     
     /**
-     * @covers \Mcf\PhpJobQueue\Job\Job::__toString
+     * @covers \Mcf\PhpJobQueue\Job\AbstractJob::__toString
      */
     public function testToString()
     {
         // sprintf('{%s:%s}', basename(str_replace('\\', '/', get_class($this))), $this->id);
-        $job = $this->getMockForAbstractClass('Mcf\\PhpJobQueue\\Job\\Job');
+        $job = $this->getMockForAbstractClass('Mcf\\PhpJobQueue\\Job\\AbstractJob');
         $job->setId('id');
         
         $string = sprintf('{%s:%s}', basename(str_replace('\\', '/', get_class($job))), 'id');
