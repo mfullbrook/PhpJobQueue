@@ -13,10 +13,10 @@ require __DIR__.'/vendor/symfony/src/Symfony/Component/ClassLoader/UniversalClas
 
 $classLoader = new Symfony\Component\ClassLoader\UniversalClassLoader();
 $classLoader->registerNamespaces(array(
-    'PhpJobQueue' => __DIR__.'/lib',
-    'Symfony'     => __DIR__.'/vendor/symfony/src',
-    'Predis'      => __DIR__.'/vendor/predis/lib',
-    'Monolog'     => __DIR__.'/vendor/monolog/src',
+    'Mcf\\PhpJobQueue' => __DIR__.'/src',
+    'Symfony'          => __DIR__.'/vendor/symfony/src',
+    'Predis'           => __DIR__.'/vendor/predis/lib',
+    'Monolog'          => __DIR__.'/vendor/monolog/src',
 ));
 $classLoader->register();
 

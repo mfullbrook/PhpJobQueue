@@ -1,0 +1,49 @@
+<?php
+
+/*
+ * This file is part of the PhpJobQueue package.
+ *
+ * (c) Mark Fullbrook <mark.fullbrook@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Mcf\PhpJobQueue\Worker;
+
+use Mcf\PhpJobQueue\TestCase;
+use Mcf\PhpJobQueue\Worker\Manager;
+use Mcf\PhpJobQueue\Mock\PhpJobQueue;
+
+class ManagerTest extends TestCase
+{
+    public function setUp()
+    {
+        parent::setUp();
+        
+    }
+    
+    
+    public function testChildFactory()
+    {
+        $pjq = new PhpJobQueue();
+        $manager = new Manager($pjq, 1);
+        $manager->setQueuesFilter(array('foo'));
+        
+        $child = $manager->childFactory();
+        $this->assertInstanceOf('Mcf\\PhpJobQueue\\Worker\\Child', $child);
+        $this->assertEquals($child->getQueuesFilter(), array('foo'));
+    }
+    
+    public function testNoFork()
+    {
+        $this->replaceFunction('pcntl_fork');
+        
+        $pjq = new PhpJobQueue();
+        $manager = new Manager($pjq, 1);
+        $manager->work();
+        
+        $this->assertEquals(0, TestCase::getFunctionCalled('pcntl_fork'));
+        
+    }
+}

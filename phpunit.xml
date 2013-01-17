@@ -12,13 +12,13 @@
 >
     <testsuites>
         <testsuite name="PhpJobQueue Test Suite">
-            <directory>./tests/PhpJobQueue/</directory>
+            <directory>./tests/Mcf/PhpJobQueue/</directory>
         </testsuite>
     </testsuites>
 
     <filter>
         <whitelist>
-            <directory suffix=".php">./lib/PhpJobQueue</directory>
+            <directory suffix=".php">./src/Mcf/PhpJobQueue</directory>
         </whitelist>
     </filter>
 
