@@ -1,11 +1,11 @@
 <?php
 
 
-include __DIR__.'/../autoload.php';
+include __DIR__.'/../vendor/autoload.php';
 
-$pjq = new PhpJobQueue\PhpJobQueue(__DIR__.'/config.yml');
+$pjq = new Mcf\PhpJobQueue\PhpJobQueue(__DIR__.'/config.yml');
 
-$job = new PhpJobQueue\Job\CommandJob();
+$job = new Mcf\PhpJobQueue\Job\CommandJob();
 $job->setCommand('sleep 10');
 
 $pjq->enqueue($job);
